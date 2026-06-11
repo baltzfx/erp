@@ -37,6 +37,16 @@
                 <input type="text" name="last_name" placeholder="Doe"
                     class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
             </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">System Role</label>
+                <select name="role_id"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                    <option value="">Select a Role</option>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="flex items-center gap-6 pt-4 border-t border-primary/5">

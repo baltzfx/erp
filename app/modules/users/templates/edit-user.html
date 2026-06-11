@@ -9,7 +9,7 @@
         <p class="text-text-main opacity-50 text-sm mt-1">Update account details for {{ target_user.username }}</p>
     </div>
 
-    <form hx-patch="/users/{{ target_user.id }}" hx-ext="json-enc" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+    <form hx-post="/users/{{ target_user.id }}/edit" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-1">
                 <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Email Address</label>
@@ -30,6 +30,16 @@
                 <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Last Name</label>
                 <input type="text" name="last_name" value="{{ target_user.last_name or '' }}"
                     class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">System Role</label>
+                <select name="role_id"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                    <option value="">Select a Role</option>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}" {% if target_user.role_id == role.id %}selected{% endif %}>{{ role.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 

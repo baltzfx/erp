@@ -25,6 +25,7 @@
                     </th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">User</th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Email Address</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Role</th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Status</th>
                     <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
                 </tr>
@@ -47,6 +48,13 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-text-main/70">{{ u.email }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        {% if u.role %}
+                        <span class="text-text-main opacity-70">{{ u.role.name }}</span>
+                        {% else %}
+                        <span class="text-text-main opacity-30 italic">No Role</span>
+                        {% endif %}
+                    </td>
                     <td class="px-6 py-4 text-sm">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs uppercase tracking-widest {{ 'bg-green-100 text-green-800' if u.is_active else 'bg-red-100 text-red-800' }}">
                             {{ 'Active' if u.is_active else 'Inactive' }}

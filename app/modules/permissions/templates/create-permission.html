@@ -1,0 +1,40 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Add New Permission{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Permission</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Create a new system access codename</p>
+    </div>
+
+    <form hx-post="/permissions/create" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Permission Name</label>
+                <input type="text" name="name" required placeholder="User Management"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Codename</label>
+                <input type="text" name="codename" required placeholder="users.manage"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main font-mono focus:ring-2 focus:ring-primary outline-none transition-all">
+                <p class="text-[10px] text-text-main opacity-30 italic mt-1">Recommended format: resource.action (e.g., users.create)</p>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
+                <textarea name="description" placeholder="Ability to view, create, edit, and delete users" rows="4"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
+            <a href="/permissions/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
+            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Create Permission
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

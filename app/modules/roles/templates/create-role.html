@@ -1,0 +1,48 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Add New Role{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Role</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Create a new system access level</p>
+    </div>
+
+    <form hx-post="/roles/create" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Role Name</label>
+                <input type="text" name="name" required placeholder="Administrator"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
+                <textarea name="description" placeholder="Full access to all system resources" rows="4"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Assign Permissions</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl">
+                    {% for perm in permissions %}
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" name="permission_ids" value="{{ perm.id }}" class="rounded border-primary/20 bg-bg-main text-primary focus:ring-primary">
+                        <div class="text-sm">
+                            <span class="font-bold text-text-main opacity-70 group-hover:opacity-100 transition-opacity">{{ perm.name }}</span>
+                            <span class="block text-[10px] text-text-main opacity-30 font-mono">{{ perm.codename }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
+            <a href="/roles/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
+            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Create Role
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

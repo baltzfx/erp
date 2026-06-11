@@ -8,6 +8,7 @@ class UserBase(BaseModel):
     last_name: Optional[str] = None
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
+    role_id: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str
@@ -20,6 +21,7 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
+    role_id: Optional[int] = None
 
 class UserOut(UserBase):
     id: int

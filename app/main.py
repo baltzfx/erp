@@ -9,8 +9,9 @@ from app.api.router import api
 from app.core.database import engine
 from app.shared.models import BaseModel
 # Import all models to ensure they are registered with BaseModel.metadata
-# from app.modules.users.model import User
-# from app.modules.auth.model import Role
+from app.modules.users.model import User
+from app.modules.roles.model import Role
+from app.modules.permissions.model import Permission
 
 # Create database tables
 BaseModel.metadata.create_all(bind=engine)

@@ -13,6 +13,7 @@ from app.modules.users import crud, schema
 from app.modules.users.model import User
 from app.modules.users.crud import verify_password
 from app.core.config import settings
+from app.modules.roles import service as role_service
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
@@ -52,15 +53,18 @@ async def profile_page(
 @router.get("/create", response_class=HTMLResponse)
 async def create_user_page(
     request: Request, 
+    db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)]
 ):
     theme = request.cookies.get("theme", "light")
+    roles = role_service.get_roles(db)
     return templates.TemplateResponse(
         request=request,
         name="users/templates/create-user.html",
         context={
             "theme": theme,
-            "user": current_user
+            "user": current_user,
+            "roles": roles
         }
     )
 
@@ -72,6 +76,7 @@ def create_user(
     password: str = Form(...),
     first_name: Optional[str] = Form(None),
     last_name: Optional[str] = Form(None),
+    role_id: Optional[int] = Form(None),
     is_active: bool = Form(True),
     is_superuser: bool = Form(False)
 ):
@@ -87,7 +92,8 @@ def create_user(
         first_name=first_name,
         last_name=last_name,
         is_active=is_active,
-        is_superuser=is_superuser
+        is_superuser=is_superuser,
+        role_id=role_id
     )
     crud.create_user(db=db, user=user_in)
     
@@ -138,22 +144,46 @@ async def edit_user_page(
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
     theme = request.cookies.get("theme", "light")
+    roles = role_service.get_roles(db)
     return templates.TemplateResponse(
         request=request,
         name="users/templates/edit-user.html",
-        context={"theme": theme, "target_user": db_user, "user": current_user}
+        context={
+            "theme": theme, 
+            "target_user": db_user, 
+            "user": current_user,
+            "roles": roles
+        }
     )
 
-@router.patch("/{user_id}")
+@router.post("/{user_id}/edit")
 async def update_user(
     user_id: int, 
-    user_data: schema.UserUpdate, 
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)],
+    email: str = Form(...),
+    username: str = Form(...),
+    password: Optional[str] = Form(None),
+    first_name: Optional[str] = Form(None),
+    last_name: Optional[str] = Form(None),
+    role_id: Optional[int] = Form(None),
+    is_active: bool = Form(True),
+    is_superuser: bool = Form(False)
 ) -> JSONResponse:
     if not current_user.is_superuser and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
         
+    user_data = schema.UserUpdate(
+        email=email,
+        username=username,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        role_id=role_id,
+        is_active=is_active,
+        is_superuser=is_superuser
+    )
+    
     db_user = crud.update_user(db, user_id=user_id, user=user_data)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")

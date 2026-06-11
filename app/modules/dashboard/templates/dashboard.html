@@ -1,0 +1,161 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Dashboard - AdminPanel{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl text-text-main tracking-tight">Overview</h1>
+        <div class="flex gap-3">
+            <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">Export PDF</button>
+            <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">New Report</button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Stat Card 1 -->
+        <div class="p-6 bg-bg-main rounded-2xl border border-primary/10 shadow-sm group hover:border-primary/30 transition-all">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+                <span class="text-green-500 text-xs font-bold">+12%</span>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-sm text-text-main opacity-60">Total Users</h3>
+                <p class="text-3xl font-medium text-text-main mt-1">1,234</p>
+            </div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="p-6 bg-bg-main rounded-2xl border border-primary/10 shadow-sm group hover:border-primary/30 transition-all">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-green-500 text-xs font-bold">+8.2%</span>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-sm text-text-main opacity-60">Revenue</h3>
+                <p class="text-3xl font-medium text-text-main mt-1">$45,678</p>
+            </div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="p-6 bg-bg-main rounded-2xl border border-primary/10 shadow-sm group hover:border-primary/30 transition-all">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <span class="text-red-500 text-xs font-bold">-3%</span>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-sm text-text-main opacity-60">Performance</h3>
+                <p class="text-3xl font-medium text-text-main mt-1">98.4%</p>
+            </div>
+        </div>
+
+        <!-- Stat Card 4 -->
+        <div class="p-6 bg-bg-main rounded-2xl border border-primary/10 shadow-sm group hover:border-primary/30 transition-all">
+            <div class="flex justify-between items-start">
+                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </div>
+                <span class="text-primary text-xs font-bold">New</span>
+            </div>
+            <div class="mt-4">
+                <h3 class="text-sm text-text-main opacity-60">Notifications</h3>
+                <p class="text-3xl font-medium text-text-main mt-1">24</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 p-8 bg-bg-main rounded-3xl border border-primary/10 shadow-sm">
+            <h2 class="text-3xl text-text-main mb-6">Users</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs uppercase tracking-wider text-text-main opacity-40 border-b border-primary/10">
+                            <th class="pb-4">User</th>
+                            <th class="pb-4">Role</th>
+                            <th class="pb-4">Date Created</th>
+                            <th class="pb-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-primary/5">
+                        {% for user in users %}
+                        <tr class="group hover:bg-primary/5 transition-colors">
+                            <td class="py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs text-primary">
+                                        {% if user.first_name and user.last_name %}
+                                            {{ user.first_name[0] }}{{ user.last_name[0] }}
+                                        {% else %}
+                                            {{ user.username[:2] }}
+                                        {% endif %}
+                                    </div>
+                                    <span class="text-sm text-text-main">
+                                        <div> {{ user.first_name }} {{ user.last_name }}</div>
+                                        <div> @{{ user.username }}</div>
+                                    </span>
+                                </div>
+                            </td>{% if user.is_superuser %}
+                            <td class="py-4 text-xs text-text-main">Administrator</td>
+                            {% else %}
+                            <td class="py-4 text-xs text-text-main">Standard User</td>
+                            {% endif %}
+                            <td class="py-4 text-sm text-text-main">{{ user.created_at.strftime('%B %d, %Y') }}</td>
+                            <td class="py-4 text-center">
+                                <span class="text-[10px] uppercase px-4 py-2 rounded-md {{ 'bg-green-500/10 text-green-500' if user.is_active else 'bg-red-500/10 text-red-500' }}">
+                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="p-8 bg-bg-main rounded-3xl border border-primary/10 shadow-sm">
+            <h2 class="text-3xl text-text-main mb-6">System Health</h2>
+            <div class="space-y-6">
+                <div>
+                    <div class="flex justify-between text-xs uppercase tracking-widest mb-2">
+                        <span class="opacity-50">CPU Usage</span>
+                        <span class="text-primary font-medium">42%</span>
+                    </div>
+                    <div class="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-1000" style="width: 42%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs uppercase tracking-widest mb-2">
+                        <span class="opacity-50">Memory</span>
+                        <span class="text-primary font-medium">68%</span>
+                    </div>
+                    <div class="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-1000" style="width: 68%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs uppercase tracking-widest mb-2">
+                        <span class="opacity-50">Storage</span>
+                        <span class="text-primary font-medium">15%</span>
+                    </div>
+                    <div class="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-1000" style="width: 15%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                <p class="text-xs text-text-main opacity-70 leading-relaxed">
+                    All systems are operational. No critical issues detected in the last 24 hours.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

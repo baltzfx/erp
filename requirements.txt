@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+sqlalchemy
+email-validator
+argon2-cffi
+itsdangerous

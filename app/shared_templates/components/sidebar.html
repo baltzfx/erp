@@ -1,0 +1,167 @@
+<!-- ================= SIDEBAR ================= -->
+<aside 
+  :class="isSidebarOpen ? 'w-64' : 'w-20'" 
+  class="flex flex-col bg-bg-main text-text-main h-full border-e border-border-main shrink-0">
+  
+  <!-- Sidebar Header & Toggle Button -->
+  <div class="p-4 flex items-center justify-between border-b border-border-main min-h-[65px]">
+    <a 
+      href="/" 
+      class="flex items-center gap-x-3 overflow-hidden hover:opacity-80 transition"
+      hx-target="#main-content"
+      hx-select="#main-content"
+    >
+      <span class="text-xl shrink-0">⚡</span>
+      <span x-show="isSidebarOpen" x-transition.opacity class="font-bold text-lg whitespace-nowrap">
+        AdminPanel
+      </span>
+    </a>
+    
+    <!-- Toggle Sidebar Button -->
+    <button 
+      @click="isSidebarOpen = !isSidebarOpen" 
+      class="p-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 text-primary transition focus:outline-hidden">
+      <svg x-show="isSidebarOpen" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <svg x-show="!isSidebarOpen" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <!-- Navigation Menu Wrapper -->
+  <nav 
+    class="p-3 w-full flex flex-col flex-wrap overflow-y-auto"
+    hx-target="#main-content" 
+    hx-select="#main-content" 
+    hx-swap="innerHTML"
+  >
+    <ul class="flex flex-col space-y-1">
+      
+      <!-- Dashboard Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 bg-primary/10 text-sm text-primary rounded-lg hover:bg-primary/20 focus:outline-hidden" href="/dashboard/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">Dashboard</span>
+        </a>
+      </li>
+
+      <!-- User Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 bg-primary/10 text-sm text-primary rounded-lg hover:bg-primary/20 focus:outline-hidden" href="/users/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">User Management</span>
+        </a>
+      </li>
+
+      <!-- Employee Accordions -->
+      <li x-data="{ open: false }">
+        <button 
+          @click="open = !open" 
+          class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden"
+        >
+          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">Employees</span>
+          
+          <svg x-show="isSidebarOpen" class="ms-auto size-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div x-show="open && isSidebarOpen" x-collapse>
+          <ul class="ps-8 pt-1 space-y-1">
+            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/employees/">Employee List</a></li>
+            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/employees/create">Create Employee</a></li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Roles Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" href="/roles/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m12 8-1 2.5-2.5.5 2 1.5-.5 2.5 2-1.5 2 1.5-.5-2.5 2-1.5-2.5-.5Z"/>
+          </svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Roles</span>
+        </a>
+      </li>
+
+      <!-- Permissions Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" href="/permissions/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="7.5" cy="15.5" r="5.5"/>
+            <path d="m21 2-9.6 9.6"/>
+            <path d="m15.5 7.5 3 3"/>
+            <path d="M17.5 5.5 20 8"/>
+          </svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Permissions</span>
+        </a>
+      </li>      
+
+      <!-- Branch Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" href="/branch/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" x2="6" y1="3" y2="15"/>
+            <circle cx="18" cy="6" r="3"/>
+            <circle cx="6" cy="18" r="3"/>
+            <path d="M18 9a9 9 0 0 1-9 9"/>
+          </svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Branch</span>
+        </a>
+      </li>
+
+      <!-- Department Link -->
+      <li>
+        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" href="/department/">
+          <svg class="shrink-0 w-4 h-4" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="16" y="16" width="6" height="6" rx="1"/>
+            <rect x="2" y="16" width="6" height="6" rx="1"/>
+            <rect x="9" y="2" width="6" height="6" rx="1"/>
+            <path d="M12 8v4"/>
+            <path d="M5 12h14v4"/>
+          </svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Department</span>
+        </a>
+      </li>
+
+      <!-- Account Accordion -->
+      <li x-data="{ open: false }">
+        <button 
+          @click="open = !open" 
+          class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden"
+        >
+          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Account</span>
+          
+          <svg x-show="isSidebarOpen" class="ms-auto size-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div x-show="open && isSidebarOpen" x-collapse>
+          <ul class="pt-1 ps-8 space-y-1">
+            <li><a class="flex items-center gap-x-3.5 py-1.5 px-2.5 text-sm text-text-muted hover:text-primary rounded-md" href="/auth/login">Logout</a></li>
+          </ul>
+        </div>
+      </li>
+
+    </ul>
+  </nav>
+</aside>
+
+
+
+      <!-- Users Accordion -->
+      <!-- <li x-data="{ open: false }">
+        <button 
+          @click="open = !open" 
+          class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden"
+        >
+          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Users</span>
+          
+          <svg x-show="isSidebarOpen" class="ms-auto size-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div x-show="open && isSidebarOpen" x-collapse>
+          <ul class="ps-8 pt-1 space-y-1">
+            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/users/">All Users</a></li>
+          </ul>
+        </div>
+      </li> -->

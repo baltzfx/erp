@@ -1,0 +1,50 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}User Details - {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-black text-text-main tracking-tight">User <span class="text-primary italic">Profile</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Detailed overview for {{ target_user.username }}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="/users/" class="px-4 py-2 bg-bg-main border border-primary/20 text-text-main rounded-xl font-bold hover:border-primary transition-all text-xs uppercase tracking-widest">Back</a>
+            <a href="/users/{{ target_user.id }}/edit" class="px-5 py-2 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20 text-xs uppercase tracking-widest">Edit</a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-8">
+        <div class="flex items-center gap-6 pb-8 border-b border-primary/5">
+            <div class="h-24 w-24 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-4xl uppercase">
+                {{ target_user.username[0] }}
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-text-main tracking-tight">{{ target_user.first_name or '—' }} {{ target_user.last_name or '' }}</h3>
+                <p class="text-text-main opacity-40 font-bold">@{{ target_user.username }}</p>
+                <div class="mt-2 flex items-center gap-2">
+                    <div class="h-2 w-2 rounded-full {{ 'bg-green-500' if target_user.is_active else 'bg-red-500' }}"></div>
+                    <span class="text-[10px] font-black uppercase tracking-widest {{ 'text-green-500' if target_user.is_active else 'text-red-500' }}">
+                        {{ 'Active' if target_user.is_active else 'Inactive' }}
+                    </span>
+                    {% if target_user.is_superuser %}
+                    <span class="ml-2 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">Admin</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-text-main opacity-30">Email Address</label>
+                <p class="font-bold text-text-main">{{ target_user.email }}</p>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-text-main opacity-30">Member Since</label>
+                <p class="font-bold text-text-main">{{ target_user.created_at.strftime('%B %d, %Y') if target_user.created_at else 'Unknown' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

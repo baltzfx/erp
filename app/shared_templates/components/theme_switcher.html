@@ -1,0 +1,49 @@
+<!-- Theme Switcher Component -->
+<div x-data="{ open: false }" class="relative">
+  
+  <!-- Toggle Icon Button -->
+  <button 
+    @click="open = !open" 
+    @click.away="open = false"
+    type="button" 
+    class="p-2 inline-flex items-center justify-center rounded-lg border border-primary bg-bg-main text-text-main shadow-sm hover:opacity-80 transition focus:outline-hidden"
+    :title="'Theme: ' + $store.theme.current"
+  >
+    <!-- Dynamic Icon Display -->
+    <template x-if="$store.theme.current === 'light'">
+      <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </template>
+    <template x-if="$store.theme.current === 'dark'">
+      <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </template>
+    <template x-if="$store.theme.current === 'cyberpunk'">
+      <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m19 8 3 5-3 5H5l-3-5 3-5h14Z"/><circle cx="12" cy="13" r="3"/></svg>
+    </template>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div 
+    x-show="open" 
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="transform opacity-0 scale-95"
+    x-transition:enter-end="transform opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="transform opacity-100 scale-100"
+    x-transition:leave-end="transform opacity-0 scale-95"
+    class="absolute right-0 top-full mt-2 min-w-40 bg-bg-main border border-primary shadow-xl rounded-lg p-1 space-y-0.5 z-50"
+    style="display: none;"
+  >
+    <button hx-post="/set-theme" hx-vals='{"theme": "light"}' hx-swap="none" @click="$store.theme.set('light'); open = false" class="flex items-center gap-x-3 py-1.5 px-2.5 rounded-md text-sm text-text-main hover:bg-primary hover:text-white transition w-full text-start" :class="$store.theme.current === 'light' ? 'bg-primary/10 font-bold' : ''">
+      <svg class="size-4 opacity-70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      Light
+    </button>
+    <button hx-post="/set-theme" hx-vals='{"theme": "dark"}' hx-swap="none" @click="$store.theme.set('dark'); open = false" class="flex items-center gap-x-3 py-1.5 px-2.5 rounded-md text-sm text-text-main hover:bg-primary hover:text-white transition w-full text-start" :class="$store.theme.current === 'dark' ? 'bg-primary/10 font-bold' : ''">
+      <svg class="size-4 opacity-70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      Dark
+    </button>
+    <button hx-post="/set-theme" hx-vals='{"theme": "cyberpunk"}' hx-swap="none" @click="$store.theme.set('cyberpunk'); open = false" class="flex items-center gap-x-3 py-1.5 px-2.5 rounded-md text-sm text-text-main hover:bg-primary hover:text-white transition w-full text-start" :class="$store.theme.current === 'cyberpunk' ? 'bg-primary/10 font-bold' : ''">
+      <svg class="size-4 opacity-70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m19 8 3 5-3 5H5l-3-5 3-5h14Z"/><circle cx="12" cy="13" r="3"/></svg>
+      Cyberpunk
+    </button>
+  </div>
+</div>

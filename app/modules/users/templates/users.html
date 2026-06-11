@@ -1,0 +1,97 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">User <span class="text-primary italic">Management</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Manage system access and member profiles</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/users/create" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add User</a>
+            <a href="/users/export/list" class="px-5 py-2.5 bg-bg-main border border-primary/20 text-text-main rounded-xl hover:border-primary transition-all">Export CSV</a>
+            <button onclick="confirmBulkDelete()" class="px-5 py-2.5 bg-bg-main border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">Delete Selected</button>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="min-w-full leading-normal" id="user-table">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-left text-xs font-black text-text-main opacity-40 uppercase tracking-widest">
+                        <input type="checkbox" id="select-all" onclick="toggleAll(this)" class="rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary">
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">User</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Email Address</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for u in users %}
+                <tr id="user-row-{{ u.id }}" class="hover:bg-primary/[0.02] transition-colors">
+                    <td class="px-6 py-4 text-sm">
+                        <input type="checkbox" class="user-checkbox rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary" value="{{ u.id }}">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                                {{ u.username[0] }}
+                            </div>
+                            <div>
+                                <p class="text-text-main text-sm">{{ u.username }}</p>
+                                <p class="text-text-main opacity-40 text-[10px] uppercase tracking-tighter">{{ u.first_name }} {{ u.last_name }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ u.email }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs uppercase tracking-widest {{ 'bg-green-100 text-green-800' if u.is_active else 'bg-red-100 text-red-800' }}">
+                            {{ 'Active' if u.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm">
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="/users/{{ u.id }}/view" class="text-primary hover:underline">View</a>
+                            <a href="/users/{{ u.id }}/edit" class="text-indigo-600 hover:underline">Edit</a>
+                            <button hx-delete="/users/{{ u.id }}" hx-confirm="Are you sure?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-red-500 hover:underline">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleAll(source) {
+        checkboxes = document.getElementsByClassName('user-checkbox');
+        for(var i=0, n=checkboxes.length;i<n;i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+
+    async function confirmBulkDelete() {
+        const selected = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => parseInt(cb.value));
+        if (selected.length === 0) return alert("Select users first");
+        
+        if (confirm(`Delete ${selected.length} users?`)) {
+            const response = await fetch('/users/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_ids: selected })
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert("Error: " + (err.detail || "Bulk delete failed"));
+            }
+        }
+    }
+</script>
+{% endblock %}

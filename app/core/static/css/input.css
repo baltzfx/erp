@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Force Tailwind v4 to look inside all your feature modules and shared folders */
+@source "../../../modules/**/*.html";
+@source "../../../shared_templates/**/*.html";
+
+@theme {
+  --color-bg-main: var(--bg-main);
+  --color-text-main: var(--text-main);
+  --color-primary: var(--primary);
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* 1. Custom Input Borders */
+  --color-input-border: color-mix(in srgb, var(--text-main) 15%, transparent);
+  --color-input-border-focus: var(--primary);
+
+  /* 2. Custom Box Shadows */
+  --shadow-input-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-input-focus: 0 0 0 4px color-mix(in srgb, var(--primary) 15%, transparent);
+  --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* 3. Missing Semantic Theme Variables */
+  /* Borders for cards, sidebars, and dividers */
+  --color-border-main: color-mix(in srgb, var(--text-main) 10%, transparent);
+  
+  /* Background variations for card surfaces, sidebar highlights, and tables */
+  --color-bg-surface: color-mix(in srgb, var(--text-main) 2%, var(--bg-main));
+  --color-bg-hover: color-mix(in srgb, var(--text-main) 5%, var(--bg-main));
+
+  /* Dimmed text color for labels, descriptions, and placeholder text */
+  --color-text-muted: color-mix(in srgb, var(--text-main) 60%, transparent);
+}
+
+/* Default / Light Theme */
+html, html[data-theme="light"] {
+  --bg-main: #ffffff;
+  --text-main: #1f2937;
+  --primary: #3b82f6;
+}
+
+/* Ensure headings use the display font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Dark Theme */
+html[data-theme="dark"] {
+  --bg-main: #111827;
+  --text-main: #f3f4f6;
+  --primary: #10b981;
+}
+
+/* Cyberpunk Theme */
+html[data-theme="cyberpunk"] {
+  --bg-main: #000000;
+  --text-main: #00ff66;
+  --primary: #ff007f;
+}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div x-data="{ isSidebarOpen: true }" class="flex h-screen bg-bg-main text-text-main overflow-hidden">
+
+  {% include 'components/sidebar.html' %}
+
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <div class="flex flex-col flex-1 h-full overflow-hidden">
+    
+    {% include 'components/header.html' %}
+
+    <!-- Main Dynamic Content Workspace -->
+    <main id="main-content" class="flex-1 p-6">
+        {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
+{% endblock %}

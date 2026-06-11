@@ -1,0 +1,57 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Edit User - {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Edit <span class="text-primary italic">User</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Update account details for {{ target_user.username }}</p>
+    </div>
+
+    <form hx-patch="/users/{{ target_user.id }}" hx-ext="json-enc" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Email Address</label>
+                <input type="email" name="email" value="{{ target_user.email }}" required
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Username</label>
+                <input type="text" name="username" value="{{ target_user.username }}" required
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">First Name</label>
+                <input type="text" name="first_name" value="{{ target_user.first_name or '' }}"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Last Name</label>
+                <input type="text" name="last_name" value="{{ target_user.last_name or '' }}"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6 pt-4 border-t border-primary/5">
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="is_active" {% if target_user.is_active %}checked{% endif %} value="true" class="rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary">
+                <span class="text-sm font-bold text-text-main opacity-60 group-hover:opacity-100 transition-opacity">Active Account</span>
+            </label>
+            {% if user.is_superuser %}
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="is_superuser" {% if target_user.is_superuser %}checked{% endif %} value="true" class="rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary">
+                <span class="text-sm font-bold text-text-main opacity-60 group-hover:opacity-100 transition-opacity">Superuser</span>
+            </label>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end gap-4 pt-6">
+            <a href="/users/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs">Cancel</a>
+            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Project 101{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/dist/output.css">
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- HTMX JSON-ENC Extension -->
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <!-- Alpine.js Plugins -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                current: '{{ theme if theme else "light" }}',
+                
+                init() {
+                    this.apply();
+                },
+                
+                set(newTheme) {
+                    this.current = newTheme;
+                    this.apply();
+                },
+                
+                apply() {
+                    document.documentElement.setAttribute('data-theme', this.current);
+                    document.body.className = this.current;
+                }
+            });
+            
+            // Legacy global for components that might still use it
+            window.setTheme = (theme) => Alpine.store('theme').set(theme);
+        });
+    </script>
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="{{ theme if theme else 'light' }}" hx-boost="true">
+    {% block body %}{% endblock %}
+</body>
+</html>

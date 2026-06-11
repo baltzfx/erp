@@ -1,0 +1,53 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Home - AdminPanel{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="p-10 bg-bg-main rounded-3xl border border-primary/20 shadow-2xl relative overflow-hidden group">
+        <div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+        <div class="relative z-10 max-w-3xl">
+            <h1 class="text-5xl font-black text-text-main tracking-tight leading-tight">
+                Welcome to <span class="text-primary italic">AdminPanel</span>
+            </h1>
+            <p class="mt-6 text-xl text-text-main opacity-70 leading-relaxed">
+                Experience a new standard of administrative control. Modular, themed, and lightning-fast. Your command hub is ready.
+            </p>
+            
+            <div class="mt-10 flex flex-wrap gap-5">
+                <a href="/dashboard/" class="px-8 py-4 bg-primary text-white rounded-2xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/30 flex items-center gap-2">
+                    <span>Go to Dashboard</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </a>
+                <a href="/auth/login" class="px-8 py-4 bg-bg-main border-2 border-primary/30 text-text-main rounded-2xl font-bold hover:border-primary hover:text-primary transition-all">
+                    Member Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="p-8 bg-bg-main rounded-2xl border border-primary/10 hover:border-primary/40 transition-colors shadow-sm">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-2xl mb-6">🎨</div>
+            <h3 class="text-xl font-bold text-text-main">Adaptive Themes</h3>
+            <p class="mt-3 text-text-main opacity-60 leading-relaxed">
+                Switch between Light, Dark, and Cyberpunk seamlessly. Our variables-first approach ensures accessibility and style.
+            </p>
+        </div>
+        <div class="p-8 bg-bg-main rounded-2xl border border-primary/10 hover:border-primary/40 transition-colors shadow-sm">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-2xl mb-6">🧩</div>
+            <h3 class="text-xl font-bold text-text-main">Pure Modularity</h3>
+            <p class="mt-3 text-text-main opacity-60 leading-relaxed">
+                Components are isolated and reusable. Extract sidebar, header, or theme switchers with zero friction.
+            </p>
+        </div>
+        <div class="p-8 bg-bg-main rounded-2xl border border-primary/10 hover:border-primary/40 transition-colors shadow-sm">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-2xl mb-6">⚡</div>
+            <h3 class="text-xl font-bold text-text-main">Ultra Fast</h3>
+            <p class="mt-3 text-text-main opacity-60 leading-relaxed">
+                Powered by FastAPI and HTMX. No heavy frameworks, just raw performance and smooth partial updates.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

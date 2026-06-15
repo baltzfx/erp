@@ -1,0 +1,52 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Department Management{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Department <span class="text-primary italic">Management</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Manage organizational departments</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/department/create" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add Department</a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="min-w-full leading-normal">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Department Name</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Description</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Created</th>
+                    <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for dept in departments %}
+                <tr id="department-row-{{ dept.id }}" class="hover:bg-primary/[0.02] transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                                {{ dept.name[0] }}
+                            </div>
+                            <p class="text-text-main text-sm font-semibold">{{ dept.name }}</p>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ dept.description or 'No description' }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main/50">{{ dept.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="px-6 py-4 text-right text-sm">
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="/department/{{ dept.id }}/edit" class="text-indigo-600 hover:underline">Edit</a>
+                            <button hx-delete="/department/{{ dept.id }}" hx-confirm="Are you sure?" hx-target="#department-row-{{ dept.id }}" hx-swap="outerHTML" class="text-red-500 hover:underline">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

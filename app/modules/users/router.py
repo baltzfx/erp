@@ -1,7 +1,7 @@
 from __future__ import annotations
 import csv
 import io
-from fastapi import APIRouter, Request, Depends, HTTPException, Form, UploadFile, File
+from fastapi import APIRouter, Request, Depends, HTTPException, Form, UploadFile, File, status
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional, Annotated, Any
@@ -71,14 +71,14 @@ async def create_user_page(
 @router.post("/")
 def create_user(
     db: Annotated[Session, Depends(get_db)],
-    email: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...),
-    first_name: Optional[str] = Form(None),
-    last_name: Optional[str] = Form(None),
-    role_id: Optional[int] = Form(None),
-    is_active: bool = Form(True),
-    is_superuser: bool = Form(False)
+    email: Annotated[str, Form(...)],
+    username: Annotated[str, Form(...)],
+    password: Annotated[str, Form(...)],
+    first_name: Annotated[Optional[str], Form()] = None,
+    last_name: Annotated[Optional[str], Form()] = None,
+    role_id: Annotated[Optional[int], Form()] = None,
+    is_active: Annotated[bool, Form()] = True,
+    is_superuser: Annotated[bool, Form()] = False
 ):
     if crud.get_user_by_email(db, email=email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -161,14 +161,14 @@ async def update_user(
     user_id: int, 
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
-    email: str = Form(...),
-    username: str = Form(...),
-    password: Optional[str] = Form(None),
-    first_name: Optional[str] = Form(None),
-    last_name: Optional[str] = Form(None),
-    role_id: Optional[int] = Form(None),
-    is_active: bool = Form(True),
-    is_superuser: bool = Form(False)
+    email: Annotated[str, Form(...)],
+    username: Annotated[str, Form(...)],
+    password: Annotated[Optional[str], Form()] = None,
+    first_name: Annotated[Optional[str], Form()] = None,
+    last_name: Annotated[Optional[str], Form()] = None,
+    role_id: Annotated[Optional[int], Form()] = None,
+    is_active: Annotated[bool, Form()] = True,
+    is_superuser: Annotated[bool, Form()] = False
 ) -> JSONResponse:
     if not current_user.is_superuser and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized")

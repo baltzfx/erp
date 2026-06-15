@@ -1,11 +1,17 @@
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, engine
+from app.shared.models import BaseModel
 from app.modules.users import crud, schema
 # Import all models to ensure they are registered with BaseModel.metadata
 from app.modules.users.model import User
-from app.modules.auth.model import Role
-from app.shared.models import Employee
+from app.modules.roles.model import Role
+from app.modules.employee.model import Employee
+from app.modules.branch.model import Branch
+from app.modules.department.model import Department
 
 def seed_db():
+    # Create tables
+    BaseModel.metadata.create_all(bind=engine)
+    
     db = SessionLocal()
     try:
         # Delete existing admin if it exists to refresh hash

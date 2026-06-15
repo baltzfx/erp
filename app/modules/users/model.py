@@ -6,7 +6,7 @@ from app.shared.models import BaseModel
 
 if TYPE_CHECKING:
     from app.modules.roles.model import Role
-    from app.shared.models import Employee
+    from app.modules.employee.model import Employee
 
 
 class User(BaseModel):

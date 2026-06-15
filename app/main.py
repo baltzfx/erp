@@ -12,6 +12,9 @@ from app.shared.models import BaseModel
 from app.modules.users.model import User
 from app.modules.roles.model import Role
 from app.modules.permissions.model import Permission
+from app.modules.employee.model import Employee
+from app.modules.branch.model import Branch
+from app.modules.department.model import Department
 
 # Create database tables
 BaseModel.metadata.create_all(bind=engine)

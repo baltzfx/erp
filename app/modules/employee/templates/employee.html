@@ -1,0 +1,86 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Employees{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Manage <span class="text-primary italic">Employees</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">View and manage all organization employees</p>
+        </div>
+        <a href="/employees/create" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Employee
+        </a>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Position</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Department</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Branch</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">User Link</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for employee in employees %}
+                <tr class="hover:bg-primary/5 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                {{ employee.first_name[0] }}{{ employee.last_name[0] }}
+                            </div>
+                            <div>
+                                <div class="font-bold text-text-main">{{ employee.first_name }} {{ employee.last_name }}</div>
+                                <div class="text-xs text-text-main opacity-50">{{ employee.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">{{ employee.position or 'N/A' }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">{{ employee.department.name if employee.department else 'N/A' }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">{{ employee.branch.name if employee.branch else 'N/A' }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">
+                        {% if employee.user %}
+                        <span class="text-primary font-medium">{{ employee.user.username }}</span>
+                        {% else %}
+                        <span class="opacity-30">No Link</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
+                            {% if employee.emp_status == 'REGULAR' %} bg-green-500/10 text-green-500 
+                            {% elif employee.emp_status == 'PROBATIONARY' %} bg-yellow-500/10 text-yellow-500
+                            {% else %} bg-primary/10 text-primary {% endif %}">
+                            {{ employee.emp_status or 'UNKNOWN' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="/employees/{{ employee.id }}/edit" class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </a>
+                            <button hx-delete="/employees/{{ employee.id }}" hx-confirm="Are you sure you want to delete this employee?" hx-target="closest tr" hx-swap="outerHTML" class="p-2 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not employees %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                        No employees found. Click "Add Employee" to create one.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

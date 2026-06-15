@@ -1,30 +1,26 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, DateTime, String, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from datetime import datetime, timezone
+from typing import Optional
+from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy.orm import DeclarativeBase
 
 class BaseModel(DeclarativeBase):
     """Base model for all database models"""
     
     id = Column(Integer, primary_key=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_lower(self, value):
-        if value and isinstance(value, str):
+    def to_lower(self, value: Optional[str]) -> Optional[str]:
+        if value:
             return value.lower()
         return value
 
-    def to_proper(self, value):
-        if value and isinstance(value, str):
+    def to_proper(self, value: Optional[str]) -> Optional[str]:
+        if value:
             return value.strip().title()
         return value
 
-class Employee(BaseModel):
-    """Employee model skeleton"""
-    
-    __tablename__ = "employee"
-    
-    employee_code = Column(String(50), unique=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    
-    user = relationship("User", back_populates="employee")
+    def to_numbers(self, value: Optional[str]) -> Optional[str]:
+        if value:
+            return "".join(filter(str.isdigit, value))
+        return value

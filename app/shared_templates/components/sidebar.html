@@ -1,7 +1,7 @@
 <!-- ================= SIDEBAR ================= -->
 <aside 
   :class="isSidebarOpen ? 'w-64' : 'w-20'" 
-  class="flex flex-col bg-bg-main text-text-main h-full border-e border-border-main shrink-0">
+  class="flex flex-col bg-bg-surface text-text-main h-full border-e border-border-main shrink-0 transition-all duration-300">
   
   <!-- Sidebar Header & Toggle Button -->
   <div class="p-4 flex items-center justify-between border-b border-border-main min-h-[65px]">
@@ -20,7 +20,7 @@
     <!-- Toggle Sidebar Button -->
     <button 
       @click="isSidebarOpen = !isSidebarOpen" 
-      class="p-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 text-primary transition focus:outline-hidden">
+      class="p-1.5 rounded-lg bg-bg-hover text-text-muted hover:text-text-main transition focus:outline-hidden">
       <svg x-show="isSidebarOpen" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
       <svg x-show="!isSidebarOpen" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
     </button>
@@ -37,38 +37,41 @@
       
       <!-- Dashboard Link -->
       <li>
-        <a class="flex items-center gap-x-3.5 py-2 px-2.5 bg-primary/10 text-sm text-primary rounded-lg hover:bg-primary/20 focus:outline-hidden" href="/dashboard/">
+        <a 
+          class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" 
+          href="/dashboard/"
+          hx-target="#main-content"
+          hx-select="#main-content"
+        >
           <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">Dashboard</span>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Dashboard</span>
         </a>
       </li>
 
       <!-- User Link -->
       <li>
-        <a class="flex items-center gap-x-3.5 py-2 px-2.5 bg-primary/10 text-sm text-primary rounded-lg hover:bg-primary/20 focus:outline-hidden" href="/users/">
+        <a 
+          class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" 
+          href="/users/"
+          hx-target="#main-content"
+          hx-select="#main-content"
+        >
           <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">User Management</span>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">User Management</span>
         </a>
       </li>
 
-      <!-- Employee Accordions -->
-      <li x-data="{ open: false }">
-        <button 
-          @click="open = !open" 
-          class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden"
+      <!-- Employee Link -->
+      <li>
+        <a 
+          class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" 
+          href="/employees/"
+          hx-target="#main-content"
+          hx-select="#main-content"
         >
           <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span x-show="isSidebarOpen" class="whitespace-nowrap transition-none">Employees</span>
-          
-          <svg x-show="isSidebarOpen" class="ms-auto size-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-
-        <div x-show="open && isSidebarOpen" x-collapse>
-          <ul class="ps-8 pt-1 space-y-1">
-            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/employees/">Employee List</a></li>
-            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/employees/create">Create Employee</a></li>
-          </ul>
-        </div>
+          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Employees</span>
+        </a>
       </li>
 
       <!-- Roles Link -->
@@ -120,7 +123,12 @@
 
       <!-- Department Link -->
       <li>
-        <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" href="/department/">
+        <a 
+          class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden" 
+          href="/department/"
+          hx-target="#main-content"
+          hx-select="#main-content"
+        >
           <svg class="shrink-0 w-4 h-4" xmlns="http://w3.org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="16" y="16" width="6" height="6" rx="1"/>
             <rect x="2" y="16" width="6" height="6" rx="1"/>
@@ -154,24 +162,3 @@
     </ul>
   </nav>
 </aside>
-
-
-
-      <!-- Users Accordion -->
-      <!-- <li x-data="{ open: false }">
-        <button 
-          @click="open = !open" 
-          class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-text-muted rounded-lg hover:bg-bg-hover hover:text-text-main transition focus:outline-hidden"
-        >
-          <svg class="shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span x-show="isSidebarOpen" x-transition.opacity class="whitespace-nowrap">Users</span>
-          
-          <svg x-show="isSidebarOpen" class="ms-auto size-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-
-        <div x-show="open && isSidebarOpen" x-collapse>
-          <ul class="ps-8 pt-1 space-y-1">
-            <li><a class="block py-1.5 px-2 text-sm text-text-muted hover:text-primary rounded-md" href="/users/">All Users</a></li>
-          </ul>
-        </div>
-      </li> -->

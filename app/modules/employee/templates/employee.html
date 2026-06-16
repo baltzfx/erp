@@ -9,16 +9,49 @@
             <h1 class="text-2xl text-text-main tracking-tight">Manage <span class="text-primary italic">Employees</span></h1>
             <p class="text-text-main opacity-50 text-sm mt-1">View and manage all organization employees</p>
         </div>
-        <a href="/employees/create" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Employee
-        </a>
+        <div class="flex items-center gap-3">
+            <!-- Export & Template -->
+            <div class="flex items-center bg-bg-main border border-primary/20 rounded-xl overflow-hidden shadow-sm">
+                <a href="/employees/export/list" download hx-boost="false" target="_blank" class="px-4 py-2.5 text-text-main hover:bg-primary/10 transition-all text-sm font-bold border-r border-primary/10">Export</a>
+            </div>
+
+            <!-- Import CSV -->
+            <form hx-post="/employees/import" 
+                  hx-encoding="multipart/form-data" 
+                  hx-trigger="change from:#employee-import-input"
+                  class="relative">
+                <label for="employee-import-input" 
+                       class="px-5 py-2.5 bg-bg-main border border-primary/20 text-primary rounded-xl hover:bg-primary/5 cursor-pointer transition-all text-sm font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    </svg>
+                    Import
+                </label>
+                <input type="file" id="employee-import-input" name="file" class="hidden" accept=".csv">
+            </form>
+
+            <!-- Bulk Actions -->
+            <button onclick="confirmBulkDelete()" class="px-5 py-2.5 bg-bg-main border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">Delete Selected</button>
+
+            <!-- Add Employee -->
+            <a href="/employees/create" 
+               hx-target="#main-content" 
+               hx-select="#main-content"
+               hx-swap="innerHTML"
+               class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Employee
+            </a>
+        </div>
     </div>
 
     <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">
+                        <input type="checkbox" id="select-all" onclick="toggleAll(this)" class="rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary">
+                    </th>
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee</th>
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Position</th>
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Department</th>
@@ -31,6 +64,9 @@
             <tbody class="divide-y divide-primary/5">
                 {% for employee in employees %}
                 <tr class="hover:bg-primary/5 transition-colors group">
+                    <td class="px-6 py-4 text-sm">
+                        <input type="checkbox" class="employee-checkbox rounded border-primary/20 bg-primary/5 text-primary focus:ring-primary" value="{{ employee.id }}">
+                    </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
@@ -74,7 +110,7 @@
                 {% endfor %}
                 {% if not employees %}
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                    <td colspan="7" class="px-6 py-12 text-center text-text-main opacity-40 italic">
                         No employees found. Click "Add Employee" to create one.
                     </td>
                 </tr>

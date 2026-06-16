@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import Column, Integer, DateTime
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Integer, DateTime
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class BaseModel(DeclarativeBase):
     """Base model for all database models"""
     
-    id = Column(Integer, primary_key=True, index=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def to_lower(self, value: Optional[str]) -> Optional[str]:
         if value:

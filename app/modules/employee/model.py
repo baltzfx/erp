@@ -1,6 +1,12 @@
-from typing import Optional
-from sqlalchemy import Boolean, Column, Date, Enum, ForeignKey, Index, Integer, Numeric, String
-from sqlalchemy.orm import backref, relationship, validates
+from datetime import date
+from typing import Optional, List, TYPE_CHECKING
+from sqlalchemy import Boolean, Date, Enum, ForeignKey, Index, Integer, Numeric, String
+from sqlalchemy.orm import Mapped, mapped_column, backref, relationship, validates
+
+if TYPE_CHECKING:
+    from app.modules.users.model import User
+    from app.modules.department.model import Department
+    from app.modules.branch.model import Branch
 
 from app.shared.models import BaseModel
 from .schema import CivilStatusEnum, EmpStatusEnum, GenderEnum, PayrollFreqEnum
@@ -12,56 +18,52 @@ class Employee(BaseModel):
     __tablename__ = "employee"
     
     # System Identity Links
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
-    emp_no = Column(String(50), unique=True, index=True, nullable=True)
-    biometric_id = Column(String(50), unique=True, index=True, nullable=True)
-    supervisor_id = Column(Integer, ForeignKey("employee.id"), nullable=True)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
+    emp_no: Mapped[Optional[str]] = mapped_column(String(50), unique=True, index=True, nullable=True)
+    biometric_id: Mapped[Optional[str]] = mapped_column(String(50), unique=True, index=True, nullable=True)
+    supervisor_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("employee.id"), nullable=True)
     
     # Personal Profile
-    first_name = Column(String(100), nullable=False)
-    middle_name = Column(String(100), nullable=True)
-    last_name = Column(String(100), nullable=False)
-    suffix = Column(String(10), nullable=True)
-    gender = Column(Enum(GenderEnum), nullable=True)
-    date_of_birth = Column(Date, nullable=True)
-    civil_status = Column(Enum(CivilStatusEnum), nullable=True)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    middle_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    suffix: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    gender: Mapped[Optional[GenderEnum]] = mapped_column(Enum(GenderEnum), nullable=True)
+    date_of_birth: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    civil_status: Mapped[Optional[CivilStatusEnum]] = mapped_column(Enum(CivilStatusEnum), nullable=True)
     
     # Contact Information
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    phone = Column(String(20), nullable=True)
-    current_address = Column(String(255), nullable=True)
-    provincial_address = Column(String(255), nullable=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    current_address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    provincial_address: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     # Employment Details
-    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
-    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
-    class_type = Column(String(100), nullable=True)  # Core categorization
-    sub_class = Column(String(100), nullable=True)    # Branch sub-grouping
-    position = Column(String(100), nullable=True)      # Specific structural job title
-    emp_status = Column(Enum(EmpStatusEnum), nullable=True)
-    hire_date = Column(Date, nullable=True)
-    date_reg_contract = Column(Date, nullable=True)    # Regularization date tracking
-    is_active = Column(Boolean, default=True, index=True)
+    branch_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("branches.id"), nullable=True)
+    department_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("departments.id"), nullable=True)
+    class_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Core categorization
+    sub_class: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)    # Branch sub-grouping
+    position: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)      # Specific structural job title
+    emp_status: Mapped[Optional[EmpStatusEnum]] = mapped_column(Enum(EmpStatusEnum), nullable=True)
+    hire_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    date_reg_contract: Mapped[Optional[date]] = mapped_column(Date, nullable=True)    # Regularization date tracking
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     
     # Background & Referrals
-    educational_attainment = Column(String(100), nullable=True)
-    recommended_by = Column(String(100), nullable=True)
+    educational_attainment: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    recommended_by: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     
     # Relationships
-    user = relationship("User", back_populates="employee")
-    department = relationship("Department", back_populates="employees")
-    branch = relationship("Branch", back_populates="employees")
-    # assets = relationship("Asset", back_populates="employee")
-    # attendances = relationship("Attendance", back_populates="employee")
-    # leave_requests = relationship("LeaveRequest", back_populates="employee")
-    # overtime_requests = relationship("OvertimeRequest", back_populates="employee")
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="employee")
+    department: Mapped[Optional["Department"]] = relationship("Department", back_populates="employees")
+    branch: Mapped[Optional["Branch"]] = relationship("Branch", back_populates="employees")
     
     # Self-referencing link for dynamic multi-level management tracking
     subordinates = relationship("Employee", backref=backref("supervisor", remote_side="Employee.id"))
     
     # Split Extensions for structural isolation
-    payroll_config = relationship("EmployeePayrollConfig", uselist=False, back_populates="employee", cascade="all, delete-orphan", single_parent=True)
-    emergency_contacts = relationship("EmergencyContact", back_populates="employee", cascade="all, delete-orphan")
+    payroll_config: Mapped[Optional["EmployeePayrollConfig"]] = relationship("EmployeePayrollConfig", uselist=False, back_populates="employee", cascade="all, delete-orphan", single_parent=True)
+    emergency_contacts: Mapped[List["EmergencyContact"]] = relationship("EmergencyContact", back_populates="employee", cascade="all, delete-orphan")
 
     @property
     def salary(self):
@@ -93,20 +95,20 @@ class EmployeePayrollConfig(BaseModel):
     
     __tablename__ = "employee_payroll_config"
     
-    employee_id = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), unique=True, nullable=False)
-    salary = Column(Numeric(10, 2), nullable=True)
-    payroll_frequency = Column(Enum(PayrollFreqEnum), default=PayrollFreqEnum.SEMI_MONTHLY)
-    bank_name = Column(String(100), nullable=True)
-    bank_account_no = Column(String(50), nullable=True)
+    employee_id: Mapped[int] = mapped_column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), unique=True, nullable=False)
+    salary: Mapped[Optional[float]] = mapped_column(Numeric(10, 2), nullable=True)
+    payroll_frequency: Mapped[PayrollFreqEnum] = mapped_column(Enum(PayrollFreqEnum), default=PayrollFreqEnum.SEMI_MONTHLY)
+    bank_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    bank_account_no: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
     # Statutory Registrations
-    tin_no = Column(String(30), nullable=True)
-    sss_no = Column(String(30), nullable=True)
-    pagibig_no = Column(String(30), nullable=True)
-    philhealth_no = Column(String(30), nullable=True)
-    national_id_no = Column(String(50), nullable=True)
+    tin_no: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    sss_no: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    pagibig_no: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    philhealth_no: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    national_id_no: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
-    employee = relationship("Employee", back_populates="payroll_config")
+    employee: Mapped["Employee"] = relationship("Employee", back_populates="payroll_config")
 
 
 class EmergencyContact(BaseModel):
@@ -114,9 +116,9 @@ class EmergencyContact(BaseModel):
     
     __tablename__ = "employee_emergency_contact"
     
-    employee_id = Column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False)
-    contact_person = Column(String(150), nullable=False)
-    mobile_number = Column(String(50), nullable=False)
-    relationship_to_emp = Column(String(50), nullable=True)
+    employee_id: Mapped[int] = mapped_column(Integer, ForeignKey("employee.id", ondelete="CASCADE"), nullable=False)
+    contact_person: Mapped[str] = mapped_column(String(150), nullable=False)
+    mobile_number: Mapped[str] = mapped_column(String(50), nullable=False)
+    relationship_to_emp: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     
-    employee = relationship("Employee", back_populates="emergency_contacts")
+    employee: Mapped["Employee"] = relationship("Employee", back_populates="emergency_contacts")

@@ -3,43 +3,60 @@
 {% block title %}Add New Role{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto p-6">
+<div class="max-w-4xl mx-auto p-6">
     <div class="mb-8">
         <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Role</span></h1>
-        <p class="text-text-main opacity-50 text-sm mt-1">Create a new system access level</p>
+        <p class="text-text-main opacity-50 text-sm mt-1">Create a new system role with specific permissions</p>
     </div>
 
-    <form hx-post="/roles/create" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
-        <div class="space-y-4">
-            <div class="space-y-1">
-                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Role Name</label>
-                <input type="text" name="name" required placeholder="Administrator"
-                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
-            </div>
-            <div class="space-y-1">
-                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
-                <textarea name="description" placeholder="Full access to all system resources" rows="4"
-                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
-            </div>
-            <div class="space-y-1">
-                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Assign Permissions</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl">
-                    {% for perm in permissions %}
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" name="permission_ids" value="{{ perm.id }}" class="rounded border-primary/20 bg-bg-main text-primary focus:ring-primary">
-                        <div class="text-sm">
-                            <span class="font-bold text-text-main opacity-70 group-hover:opacity-100 transition-opacity">{{ perm.name }}</span>
-                            <span class="block text-[10px] text-text-main opacity-30 font-mono">{{ perm.codename }}</span>
-                        </div>
-                    </label>
-                    {% endfor %}
+    <form hx-post="/roles/create" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-8">
+        <div class="space-y-6">
+            <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">01</span>
+                Role Information
+            </h3>
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Role Name</label>
+                    <input type="text" name="name" required placeholder="Administrator"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
+                    <textarea name="description" placeholder="Full access to all system modules" rows="3"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
                 </div>
             </div>
         </div>
 
+        <div class="space-y-6 pt-8 border-t border-primary/5">
+            <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">02</span>
+                Permissions
+            </h3>
+            {% if permissions %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for permission in permissions %}
+                <label class="flex items-center gap-3 p-4 bg-primary/5 border border-primary/10 rounded-xl cursor-pointer hover:bg-primary/10 transition-all group">
+                    <input type="checkbox" name="permission_ids" value="{{ permission.id }}"
+                        class="w-5 h-5 rounded border-primary/20 bg-white text-primary focus:ring-primary">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-text-main">{{ permission.name }}</span>
+                        <span class="text-[10px] text-text-main opacity-40 font-mono">{{ permission.codename }}</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-8 text-center bg-primary/5 rounded-2xl border border-dashed border-primary/20">
+                <p class="text-text-main opacity-40 italic">No permissions found. Please <a href="/permissions/" class="text-primary underline font-bold">sync permissions</a> first.</p>
+            </div>
+            {% endif %}
+        </div>
+
         <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
             <a href="/roles/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
-            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+            <button type="submit" class="px-8 py-3 bg-bg-main rounded-xl transition-all shadow-lg shadow-primary/20">
                 Create Role
             </button>
         </div>

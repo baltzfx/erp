@@ -10,9 +10,35 @@
             <p class="text-text-main opacity-50 text-sm mt-1">Manage system access and member profiles</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="/users/create" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add User</a>
-            <a href="/users/export/list" class="px-5 py-2.5 bg-bg-main border border-primary/20 text-text-main rounded-xl hover:border-primary transition-all">Export CSV</a>
+            <!-- Export & Template -->
+            <div class="flex items-center bg-bg-main border border-primary/20 rounded-xl overflow-hidden shadow-sm">
+                <a href="/users/export/list" download hx-boost="false" target="_blank" class="px-4 py-2.5 text-text-main hover:bg-primary/10 transition-all text-sm font-bold border-r border-primary/10">Export</a>
+            </div>
+
+            <!-- Import CSV -->
+            <form hx-post="/users/import" 
+                  hx-encoding="multipart/form-data" 
+                  hx-trigger="change from:#user-import-input"
+                  class="relative">
+                <label for="user-import-input" 
+                       class="px-5 py-2.5 bg-bg-main border border-primary/20 text-primary rounded-xl hover:bg-primary/5 cursor-pointer transition-all text-sm font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                    </svg>
+                    Import
+                </label>
+                <input type="file" id="user-import-input" name="file" class="hidden" accept=".csv">
+            </form>
+
+            <!-- Bulk Actions -->
             <button onclick="confirmBulkDelete()" class="px-5 py-2.5 bg-bg-main border border-red-500/20 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">Delete Selected</button>
+
+            <!-- Add User -->
+            <a href="/users/create" 
+               hx-target="#main-content" 
+               hx-select="#main-content"
+               hx-swap="innerHTML"
+               class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add User</a>
         </div>
     </div>
 

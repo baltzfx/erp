@@ -1,6 +1,6 @@
 from typing import List, Optional, Annotated
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.templates import templates
@@ -50,7 +50,10 @@ async def create_role(
 ):
     role_in = schema.RoleCreate(name=name, description=description, permission_ids=permission_ids)
     service.create_role(db, role_in)
-    return RedirectResponse(url="/roles/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/roles/"}
+    )
 
 @router.get("/{role_id}/edit", response_class=HTMLResponse)
 async def edit_role_page(
@@ -81,7 +84,10 @@ async def edit_role(
 ):
     role_in = schema.RoleUpdate(name=name, description=description, permission_ids=permission_ids)
     service.update_role(db, role_id, role_in)
-    return RedirectResponse(url="/roles/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/roles/"}
+    )
 
 @router.delete("/{role_id}")
 async def delete_role(
@@ -90,4 +96,7 @@ async def delete_role(
     current_user: Annotated[User, Depends(deps.get_current_user)]
 ):
     service.delete_role(db, role_id)
-    return RedirectResponse(url="/roles/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/roles/"}
+    )

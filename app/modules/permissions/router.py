@@ -1,6 +1,6 @@
 from typing import Annotated, Optional, Any, List, Dict
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from fastapi.routing import APIRoute
 
@@ -86,6 +86,39 @@ async def list_permissions(
         }
     )
 
+@router.post("/sync")
+async def sync_permissions(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    # 1. Fetch existing permissions to avoid duplicates
+    db_permissions = service.get_permissions(db)
+    permission_lookup = {str(p.codename): p for p in db_permissions}
+    
+    # 2. Discover and Register Routes
+    routes = getattr(request.app, "routes", [])
+    for route in routes:
+        if isinstance(route, APIRoute):
+            # Skip internal and static utility routes
+            if route.path in ["/openapi.json", "/docs", "/redoc"] or "/static" in route.path:
+                continue
+                
+            codename = str(route.name or getattr(route.endpoint, "__name__", "unnamed_route"))
+            if codename not in permission_lookup:
+                display_name = codename.replace("_", " ").replace("-", " ").title()
+                permission_in = schema.PermissionCreate(
+                    name=display_name,
+                    codename=codename,
+                    description=f"Auto-generated permission for {route.path}"
+                )
+                service.create_permission(db, permission_in)
+                
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/permissions/"}
+    )
+
 @router.get("/create", response_class=HTMLResponse)
 async def create_permission_page(
     request: Request,
@@ -108,7 +141,10 @@ async def create_permission(
 ):
     permission_in = schema.PermissionCreate(name=name, codename=codename, description=description)
     service.create_permission(db, permission_in)
-    return RedirectResponse(url="/permissions/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/permissions/"}
+    )
 
 @router.get("/{permission_id}/edit", response_class=HTMLResponse)
 async def edit_permission_page(
@@ -138,7 +174,10 @@ async def edit_permission(
 ):
     permission_in = schema.PermissionUpdate(name=name, codename=codename, description=description)
     service.update_permission(db, permission_id, permission_in)
-    return RedirectResponse(url="/permissions/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/permissions/"}
+    )
 
 @router.delete("/{permission_id}")
 async def delete_permission(
@@ -147,4 +186,7 @@ async def delete_permission(
     current_user: Annotated[User, Depends(deps.get_current_user)]
 ):
     service.delete_permission(db, permission_id)
-    return RedirectResponse(url="/permissions/", status_code=status.HTTP_303_SEE_OTHER)
+    return JSONResponse(
+        content={"status": "success"},
+        headers={"HX-Redirect": "/permissions/"}
+    )

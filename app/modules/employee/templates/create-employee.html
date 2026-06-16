@@ -32,12 +32,22 @@
                     <input type="text" name="last_name" required placeholder="Doe"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Suffix</label>
+                    <input type="text" name="suffix" placeholder="Jr., III"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Email</label>
                     <input type="email" name="email" required placeholder="john.doe@example.com"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Phone Number</label>
+                    <input type="text" name="phone" placeholder="+63 900 000 0000"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
@@ -49,6 +59,13 @@
                         {% endfor %}
                     </select>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Date of Birth</label>
+                    <input type="date" name="date_of_birth" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Civil Status</label>
                     <select name="civil_status" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
@@ -59,6 +76,19 @@
                     </select>
                 </div>
             </div>
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Current Address</label>
+                    <input type="text" name="current_address" placeholder="House No., Street, Barangay, City"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Provincial Address</label>
+                    <input type="text" name="provincial_address" placeholder="Same as current"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
         </div>
 
         <!-- Employment Details Section -->
@@ -67,10 +97,15 @@
                 <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">02</span>
                 Employment Details
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee No.</label>
                     <input type="text" name="emp_no" placeholder="EMP-001"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Biometric ID</label>
+                    <input type="text" name="biometric_id" placeholder="BIO-1234"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
@@ -98,6 +133,43 @@
                         <option value="{{ branch.id }}">{{ branch.name }}</option>
                         {% endfor %}
                     </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Class Type</label>
+                    <input type="text" name="class_type" placeholder="e.g. Core, Support"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Sub Class</label>
+                    <input type="text" name="sub_class" placeholder="Branch sub-group"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Hire Date</label>
+                    <input type="date" name="hire_date" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Regularization Date</label>
+                    <input type="date" name="date_reg_contract" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Education Attainment</label>
+                    <input type="text" name="educational_attainment" placeholder="Bachelor's Degree"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Recommended By</label>
+                    <input type="text" name="recommended_by" placeholder="Referral Name"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
             </div>
 
@@ -134,10 +206,73 @@
             </div>
         </div>
 
+        <!-- Payroll & Statutory Details Section -->
+        <div class="space-y-6 pt-8 border-t border-primary/5">
+            <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">03</span>
+                Payroll & Statutory Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Monthly Salary</label>
+                    <input type="number" step="0.01" name="salary" placeholder="0.00"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Payroll Frequency</label>
+                    <select name="payroll_frequency" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                        {% for freq in payroll_frequencies %}
+                        <option value="{{ freq.value }}">{{ freq.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Bank Name</label>
+                    <input type="text" name="bank_name" placeholder="BDO, BPI, etc."
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Bank Account No.</label>
+                    <input type="text" name="bank_account_no" placeholder="0000-0000-00"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">TIN No.</label>
+                    <input type="text" name="tin_no" placeholder="000-000-000-000"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">SSS No.</label>
+                    <input type="text" name="sss_no" placeholder="00-0000000-0"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">PhilHealth No.</label>
+                    <input type="text" name="philhealth_no" placeholder="00-000000000-0"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">HDMF No.</label>
+                    <input type="text" name="hdmf_no" placeholder="00-0000000-0"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">National ID No.</label>
+                    <input type="text" name="national_id_no" placeholder="00-000000000-0"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+
+        </div>
+
         <!-- Form Actions -->
         <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
             <a href="/employees/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
-            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+            <button type="submit" class="px-8 py-3 bg-bg-main text-text-main opacity-40 rounded-xl  hover:opacity-100  font-bold transition-all shadow-lg shadow-primary/20">
                 Create Employee
             </button>
         </div>

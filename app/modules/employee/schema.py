@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import date
 
@@ -92,6 +92,16 @@ class EmployeeBase(BaseModel):
     recommended_by: Optional[str] = None
     is_active: bool = True
     user_id: Optional[int] = None
+    # Payroll & Statutory (Flattened for Form Handling)
+    salary: Optional[float] = None
+    payroll_frequency: PayrollFreqEnum = PayrollFreqEnum.SEMI_MONTHLY
+    bank_name: Optional[str] = None
+    bank_account_no: Optional[str] = None
+    tin_no: Optional[str] = None
+    sss_no: Optional[str] = None
+    pagibig_no: Optional[str] = None
+    philhealth_no: Optional[str] = None
+    national_id_no: Optional[str] = None
 
 class EmployeeCreate(EmployeeBase):
     pass
@@ -123,8 +133,21 @@ class EmployeeUpdate(BaseModel):
     recommended_by: Optional[str] = None
     is_active: Optional[bool] = None
     user_id: Optional[int] = None
+    # Payroll & Statutory (Flattened for Form Handling)
+    salary: Optional[float] = None
+    payroll_frequency: Optional[PayrollFreqEnum] = None
+    bank_name: Optional[str] = None
+    bank_account_no: Optional[str] = None
+    tin_no: Optional[str] = None
+    sss_no: Optional[str] = None
+    pagibig_no: Optional[str] = None
+    philhealth_no: Optional[str] = None
+    national_id_no: Optional[str] = None
 
 class EmployeeOut(EmployeeBase):
     id: int
     
     model_config = ConfigDict(from_attributes=True)
+
+class BulkDeleteRequest(BaseModel):
+    employee_ids: List[int]

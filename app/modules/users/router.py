@@ -1,7 +1,7 @@
 from __future__ import annotations
 import csv
 import io
-from fastapi import APIRouter, Request, Depends, HTTPException, Form, UploadFile, File, status
+from fastapi import APIRouter, Request, Depends, HTTPException, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional, Annotated, Any
@@ -12,7 +12,6 @@ from app.api.deps import get_current_user
 from app.modules.users import crud, schema
 from app.modules.users.model import User
 from app.modules.users.crud import verify_password
-from app.core.config import settings
 from app.modules.roles import service as role_service
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
@@ -239,10 +238,10 @@ def export_users(db: Annotated[Session, Depends(get_db)]):
     
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["ID", "Email", "Username", "First Name", "Last Name", "Active", "Superuser"])
+    writer.writerow(["id", "email", "username", "first_name", "last_name", "is_active", "is_superuser"])
     
     for u in users:
-        writer.writerow([u.id, u.email, u.username, u.first_name, u.last_name, u.is_active, u.is_superuser])
+        writer.writerow([u.id, u.email, u.username, u.first_name or "", u.last_name or "", u.is_active, u.is_superuser])
     
     output.seek(0)
     return StreamingResponse(
@@ -269,9 +268,13 @@ def export_template():
 async def import_users(
     db: Annotated[Session, Depends(get_db)],
     file: UploadFile = File(...)
-) -> dict[str, Any]:
+) -> JSONResponse:
     content = await file.read()
-    stream = io.StringIO(content.decode("utf-8"))
+    try:
+        stream = io.StringIO(content.decode("utf-8"))
+    except UnicodeDecodeError:
+        stream = io.StringIO(content.decode("latin-1"))
+        
     reader = csv.DictReader(stream)
     
     imported_count = 0
@@ -279,10 +282,15 @@ async def import_users(
     
     for row in reader:
         try:
+            # Handle missing passwords (e.g. when importing from an export file)
+            password = row.get('password')
+            if not password:
+                password = "Password123!"
+
             user_in = schema.UserCreate(
                 email=row['email'],
                 username=row['username'],
-                password=row['password'],
+                password=password,
                 first_name=row.get('first_name'),
                 last_name=row.get('last_name'),
                 is_active=row.get('is_active', 'True').lower() == 'true',
@@ -294,11 +302,10 @@ async def import_users(
         except Exception as e:
             errors.append(f"Error importing {row.get('email')}: {str(e)}")
             
-    return {
-        "status": "success", 
-        "imported": imported_count, 
-        "errors": errors
-    }
+    return JSONResponse(
+        content={"status": "success", "imported": imported_count, "errors": errors},
+        headers={"HX-Redirect": "/users/"}
+    )
 
 @router.delete("/{user_id}", response_model=schema.UserOut)
 def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):

@@ -6,20 +6,19 @@
 <div class="max-w-4xl mx-auto p-6">
     <div class="mb-8">
         <h1 class="text-3xl font-black text-text-main tracking-tight">Edit <span class="text-primary italic">Employee</span></h1>
-        <p class="text-text-main opacity-50 text-sm mt-1">Update employee details for {{ employee.first_name }} {{ employee.last_name }}</p>
+        <p class="text-text-main opacity-50 text-sm mt-1">Update employee details</p>
     </div>
 
     <form action="/employees/{{ employee.id }}/edit" method="POST" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-8">
-        <!-- Personal Information Section -->
         <div class="space-y-6">
             <h3 class="text-lg font-bold text-primary flex items-center gap-2">
                 <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">01</span>
                 Personal Information
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">First Name</label>
-                    <input type="text" name="first_name" required value="{{ employee.first_name }}"
+                    <input type="text" name="first_name" value="{{ employee.first_name }}" required
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
@@ -29,15 +28,33 @@
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Last Name</label>
-                    <input type="text" name="last_name" required value="{{ employee.last_name }}"
+                    <input type="text" name="last_name" value="{{ employee.last_name }}" required
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Suffix</label>
+                    <input type="text" name="suffix" value="{{ employee.suffix or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Email</label>
+                    <input type="email" name="email" value="{{ employee.email }}" required
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Phone Number</label>
+                    <input type="text" name="phone" value="{{ employee.phone or '' }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-1">
-                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Email</label>
-                    <input type="email" name="email" required value="{{ employee.email }}"
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Date of Birth</label>
+                    <input type="date" name="date_of_birth" value="{{ employee.date_of_birth.isoformat() if employee.date_of_birth else '' }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
@@ -59,18 +76,35 @@
                     </select>
                 </div>
             </div>
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Current Address</label>
+                    <input type="text" name="current_address" value="{{ employee.current_address or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Provincial Address</label>
+                    <input type="text" name="provincial_address" value="{{ employee.provincial_address or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
         </div>
 
-        <!-- Employment Details Section -->
         <div class="space-y-6 pt-8 border-t border-primary/5">
             <h3 class="text-lg font-bold text-primary flex items-center gap-2">
                 <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">02</span>
                 Employment Details
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee No.</label>
                     <input type="text" name="emp_no" value="{{ employee.emp_no or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Biometric ID</label>
+                    <input type="text" name="biometric_id" value="{{ employee.biometric_id or '' }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
@@ -103,15 +137,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-1">
-                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Supervisor</label>
-                    <select name="supervisor_id" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
-                        <option value="">Select Supervisor</option>
-                        {% for sup in supervisors %}
-                        {% if sup.id != employee.id %}
-                        <option value="{{ sup.id }}" {% if employee.supervisor_id == sup.id %}selected{% endif %}>{{ sup.first_name }} {{ sup.last_name }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Hire Date</label>
+                    <input type="date" name="hire_date" value="{{ employee.hire_date.isoformat() if employee.hire_date else '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employment Status</label>
@@ -132,15 +160,65 @@
                     <option value="{{ u.id }}" {% if employee.user_id == u.id %}selected{% endif %}>{{ u.username }} ({{ u.email }})</option>
                     {% endfor %}
                 </select>
-                <p class="text-[10px] text-text-main opacity-40 mt-1">Optional: Link this employee record to a system user account</p>
             </div>
         </div>
 
-        <!-- Form Actions -->
+        <!-- Payroll & Statutory Details Section -->
+        <div class="space-y-6 pt-8 border-t border-primary/5">
+            <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">03</span>
+                Payroll & Statutory Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Monthly Salary</label>
+                    <input type="number" step="0.01" name="salary" value="{{ employee.payroll_config.salary or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Payroll Frequency</label>
+                    <select name="payroll_frequency" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                        {% for freq in payroll_frequencies %}
+                        <option value="{{ freq.value }}" {% if employee.payroll_config.payroll_frequency == freq %}selected{% endif %}>{{ freq.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Bank Name</label>
+                    <input type="text" name="bank_name" value="{{ employee.payroll_config.bank_name or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Bank Account No.</label>
+                    <input type="text" name="bank_account_no" value="{{ employee.payroll_config.bank_account_no or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">TIN No.</label>
+                    <input type="text" name="tin_no" value="{{ employee.payroll_config.tin_no or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">SSS No.</label>
+                    <input type="text" name="sss_no" value="{{ employee.payroll_config.sss_no or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">PhilHealth No.</label>
+                    <input type="text" name="philhealth_no" value="{{ employee.payroll_config.philhealth_no or '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
             <a href="/employees/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
             <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
-                Update Employee
+                Save Changes
             </button>
         </div>
     </form>

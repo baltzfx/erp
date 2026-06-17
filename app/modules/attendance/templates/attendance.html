@@ -1,0 +1,76 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Attendance <span class="text-primary italic">Management</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Manage employee attendance records</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/attendance/create" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add Record</a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr class="bg-primary/5 border-b border-primary/10">
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Employee</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Date</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Check In</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Check Out</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Total</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest text-red-400">Late</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest text-orange-400">Under</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest text-green-400">OT</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest font-bold text-primary">Net</th>
+                        <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Status</th>
+                        <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-primary/5">
+                    {% for attendance in attendances %}
+                    <tr id="attendance-row-{{ attendance.id }}" class="hover:bg-primary/[0.02] transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                                    {{ attendance.employee.first_name[0] }}{{ attendance.employee.last_name[0] }}
+                                </div>
+                                <p class="text-text-main text-sm font-semibold">{{ attendance.employee.first_name }} {{ attendance.employee.last_name }}</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-text-main/70">{{ attendance.date.strftime('%Y-%m-%d') }}</td>
+                        <td class="px-6 py-4 text-sm text-text-main/70">{{ attendance.check_in.strftime('%H:%M:%S') if attendance.check_in else '-' }}</td>
+                        <td class="px-6 py-4 text-sm text-text-main/70">{{ attendance.check_out.strftime('%H:%M:%S') if attendance.check_out else '-' }}</td>
+                        <td class="px-6 py-4 text-sm text-text-main/70">{{ attendance.total_minutes or '0' }}m</td>
+                        <td class="px-6 py-4 text-sm {% if attendance.late_minutes > 0 %}text-red-500 font-bold{% else %}text-text-main/40{% endif %}">{{ attendance.late_minutes or '0' }}m</td>
+                        <td class="px-6 py-4 text-sm {% if attendance.undertime_minutes > 0 %}text-orange-500 font-bold{% else %}text-text-main/40{% endif %}">{{ attendance.undertime_minutes or '0' }}m</td>
+                        <td class="px-6 py-4 text-sm {% if attendance.overtime_minutes > 0 %}text-green-500 font-bold{% else %}text-text-main/40{% endif %}">{{ attendance.overtime_minutes or '0' }}m</td>
+                        <td class="px-6 py-4 text-sm text-primary font-black">{{ attendance.work_minutes or '0' }}m</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if attendance.status == 'Present' %}bg-green-100 text-green-700
+                                {% elif attendance.status == 'Absent' %}bg-red-100 text-red-700
+                                {% elif attendance.status == 'Late' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ attendance.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm">
+                            <div class="flex items-center justify-end gap-3">
+                                <a href="/attendance/{{ attendance.id }}/edit" class="text-indigo-600 hover:underline">Edit</a>
+                                <button hx-delete="/attendance/{{ attendance.id }}" hx-confirm="Are you sure?" hx-target="#attendance-row-{{ attendance.id }}" hx-swap="outerHTML" class="text-red-500 hover:underline">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

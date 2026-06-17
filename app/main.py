@@ -5,7 +5,6 @@ from fastapi import FastAPI, Request, Response, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api.router import api
 from app.core.database import engine
 from app.shared.models import BaseModel
 # Import all models to ensure they are registered with BaseModel.metadata
@@ -15,10 +14,14 @@ from app.modules.permissions.model import Permission
 from app.modules.employee.model import Employee
 from app.modules.branch.model import Branch
 from app.modules.department.model import Department
+from app.modules.attendance.model import Attendance
+from app.modules.leave.model import LeaveRequest
+from app.modules.holiday.model import Holiday
 
 # Create database tables
 BaseModel.metadata.create_all(bind=engine)
 
+from app.api.router import api
 from app.core.templates import templates
 
 app = FastAPI()
@@ -67,4 +70,4 @@ async def set_theme(response: Response, theme: str = Form(...)):
     return resp
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

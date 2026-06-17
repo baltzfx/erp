@@ -2,11 +2,15 @@ from app.core.database import SessionLocal, engine
 from app.shared.models import BaseModel
 from app.modules.users import crud, schema
 # Import all models to ensure they are registered with BaseModel.metadata
-from app.modules.users.model import User
-from app.modules.roles.model import Role
-from app.modules.employee.model import Employee
-from app.modules.branch.model import Branch
-from app.modules.department.model import Department
+# from app.modules.users.model import User
+# from app.modules.roles.model import Role
+# from app.modules.employee.model import Employee
+# from app.modules.branch.model import Branch
+# from app.modules.department.model import Department
+# from app.modules.shifts.model import Shift
+# from app.modules.attendance.model import Attendance
+# from app.modules.leave.model import LeaveRequest
+# from app.modules.holiday.model import Holiday
 
 def seed_db():
     # Create tables

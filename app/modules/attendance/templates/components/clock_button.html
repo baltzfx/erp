@@ -1,0 +1,31 @@
+<div id="clock-container" class="flex flex-col items-center gap-2">
+    {% if not attendance %}
+    <button hx-post="/attendance/clock-in-out" 
+            hx-target="#clock-container" 
+            hx-swap="outerHTML"
+            class="px-6 py-3 bg-green-500 text-white rounded-xl font-bold hover:scale-[1.05] active:scale-95 transition-all shadow-lg shadow-green-500/20">
+        Clock In
+    </button>
+    <p class="text-xs text-text-main opacity-40 uppercase tracking-widest font-black">Not Clocked In</p>
+    {% elif not attendance.check_out %}
+    <button hx-post="/attendance/clock-in-out" 
+            hx-target="#clock-container" 
+            hx-swap="outerHTML"
+            class="px-6 py-3 bg-red-500 text-white rounded-xl font-bold hover:scale-[1.05] active:scale-95 transition-all shadow-lg shadow-red-500/20">
+        Clock Out
+    </button>
+    <p class="text-xs text-text-main opacity-60 font-semibold">
+        Clocked In at: <span class="text-primary italic">{{ attendance.check_in.strftime('%H:%M') }}</span>
+    </p>
+    {% else %}
+    <div class="px-6 py-3 bg-gray-400 text-white rounded-xl font-bold cursor-not-allowed opacity-60">
+        Shift Completed
+    </div>
+    <div class="flex flex-col items-center">
+        <p class="text-xs text-text-main opacity-60 font-semibold">
+            In: <span class="text-primary italic">{{ attendance.check_in.strftime('%H:%M') }}</span>
+            | Out: <span class="text-primary italic">{{ attendance.check_out.strftime('%H:%M') }}</span>
+        </p>
+    </div>
+    {% endif %}
+</div>

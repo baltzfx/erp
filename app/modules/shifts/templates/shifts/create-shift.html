@@ -1,0 +1,48 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Add New Shift{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Shift</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Define a reusable work schedule</p>
+    </div>
+
+    <form action="/shifts/create" method="POST" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Shift Name</label>
+                <input type="text" name="name" required placeholder="e.g. Regular Shift, Morning Shift"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Start Time</label>
+                    <input type="time" name="start_time" required value="08:00"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">End Time</label>
+                    <input type="time" name="end_time" required value="17:00"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
+                <textarea name="description" placeholder="Optional notes about this shift" rows="3"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
+            <a href="/shifts/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
+            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Create Shift
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

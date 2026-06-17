@@ -1,0 +1,68 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Edit Attendance Record{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Edit <span class="text-primary italic">Attendance</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Update attendance record for {{ attendance.employee.first_name }} {{ attendance.employee.last_name }}</p>
+    </div>
+
+    <form hx-post="/attendance/{{ attendance.id }}/edit" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee</label>
+                <select name="employee_id" required
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                    {% for employee in employees %}
+                    <option value="{{ employee.id }}" {% if employee.id == attendance.employee_id %}selected{% endif %}>
+                        {{ employee.first_name }} {{ employee.last_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Date</label>
+                    <input type="date" name="date" required value="{{ attendance.date.strftime('%Y-%m-%d') }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</label>
+                    <select name="status" required
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                        {% for status in statuses %}
+                        <option value="{{ status.value }}" {% if status.value == attendance.status %}selected{% endif %}>{{ status.value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Check In</label>
+                    <input type="datetime-local" name="check_in" value="{{ attendance.check_in.strftime('%Y-%m-%dT%H:%M') if attendance.check_in else '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Check Out</label>
+                    <input type="datetime-local" name="check_out" value="{{ attendance.check_out.strftime('%Y-%m-%dT%H:%M') if attendance.check_out else '' }}"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Remarks</label>
+                <textarea name="remarks" placeholder="Optional remarks" rows="3"
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">{{ attendance.remarks or '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
+            <a href="/attendance/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
+            <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
+                Update Record
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

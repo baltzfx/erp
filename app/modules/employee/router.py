@@ -14,6 +14,7 @@ from app.modules.users.model import User
 from app.modules.department import service as dept_service
 from app.modules.branch import service as branch_service
 from app.modules.users import crud as user_service
+from app.modules.shifts import service as shift_service
 
 router = APIRouter()
 
@@ -41,12 +42,14 @@ async def create_employee_page(
     branches = branch_service.get_branches(db)
     users = user_service.get_users(db)
     supervisors = service.get_employees(db)
+    shifts = shift_service.get_shifts(db)
     
     theme = request.cookies.get("theme", "light")
     return templates.TemplateResponse(
         request=request,
         name="employee/templates/create-employee.html",
         context={
+            "shifts": shifts,
             "theme": theme, 
             "user": current_user,
             "departments": departments,
@@ -77,6 +80,7 @@ async def create_employee(
     provincial_address: Annotated[Optional[str], Form()] = None,
     emp_status: Annotated[Optional[schema.EmpStatusEnum], Form()] = None,
     department_id: Annotated[Optional[int], Form()] = None,
+    shift_id: Annotated[Optional[int], Form()] = None,
     branch_id: Annotated[Optional[int], Form()] = None,
     user_id: Annotated[Optional[int], Form()] = None,
     supervisor_id: Annotated[Optional[int], Form()] = None,
@@ -121,12 +125,14 @@ async def edit_employee_page(
     branches = branch_service.get_branches(db)
     users = user_service.get_users(db)
     supervisors = service.get_employees(db)
+    shifts = shift_service.get_shifts(db)
     
     theme = request.cookies.get("theme", "light")
     return templates.TemplateResponse(
         request=request,
         name="employee/templates/edit-employee.html",
         context={
+            "shifts": shifts,
             "employee": employee, 
             "theme": theme, 
             "user": current_user,
@@ -159,6 +165,7 @@ async def edit_employee(
     provincial_address: Annotated[Optional[str], Form()] = None,
     emp_status: Annotated[Optional[schema.EmpStatusEnum], Form()] = None,
     department_id: Annotated[Optional[int], Form()] = None,
+    shift_id: Annotated[Optional[int], Form()] = None,
     branch_id: Annotated[Optional[int], Form()] = None,
     user_id: Annotated[Optional[int], Form()] = None,
     supervisor_id: Annotated[Optional[int], Form()] = None,
@@ -208,7 +215,7 @@ def export_employees(db: Annotated[Session, Depends(get_db)]):
     writer.writerow([
         "id", "emp_no", "biometric_id", "first_name", "middle_name", "last_name", "suffix",
         "gender", "date_of_birth", "civil_status", "email", "phone", "current_address",
-        "provincial_address", "branch_id", "department_id", "class_type", "sub_class",
+        "provincial_address", "branch_id", "department_id", "shift_id", "class_type", "sub_class",
         "position", "emp_status", "hire_date", "date_reg_contract", "is_active",
         "educational_attainment", "recommended_by", "user_id", "supervisor_id",
         # Payroll config fields (if directly accessible or joined)
@@ -221,7 +228,7 @@ def export_employees(db: Annotated[Session, Depends(get_db)]):
             emp.id, emp.emp_no if emp.emp_no is not None else "", emp.biometric_id if emp.biometric_id is not None else "", emp.first_name, emp.middle_name if emp.middle_name is not None else "", emp.last_name, emp.suffix if emp.suffix is not None else "",
             emp.gender.value if emp.gender is not None else "", emp.date_of_birth.isoformat() if emp.date_of_birth is not None else "", emp.civil_status.value if emp.civil_status is not None else "",
             emp.email, emp.phone if emp.phone is not None else "", emp.current_address if emp.current_address is not None else "", emp.provincial_address if emp.provincial_address is not None else "",
-            emp.branch_id if emp.branch_id is not None else "", emp.department_id if emp.department_id is not None else "", emp.class_type if emp.class_type is not None else "", emp.sub_class if emp.sub_class is not None else "",
+            emp.branch_id if emp.branch_id is not None else "", emp.department_id if emp.department_id is not None else "", emp.shift_id if emp.shift_id is not None else "", emp.class_type if emp.class_type is not None else "", emp.sub_class if emp.sub_class is not None else "",
             emp.position if emp.position is not None else "", emp.emp_status.value if emp.emp_status is not None else "", emp.hire_date.isoformat() if emp.hire_date is not None else "",
             emp.date_reg_contract.isoformat() if emp.date_reg_contract is not None else "", emp.is_active,
             emp.educational_attainment if emp.educational_attainment is not None else "", emp.recommended_by if emp.recommended_by is not None else "", emp.user_id if emp.user_id is not None else "", emp.supervisor_id if emp.supervisor_id is not None else ""
@@ -262,7 +269,7 @@ def export_employee_template():
     writer.writerow([
         "first_name", "middle_name", "last_name", "suffix", "gender", "date_of_birth",
         "civil_status", "email", "phone", "current_address", "provincial_address",
-        "emp_no", "biometric_id", "position", "class_type", "sub_class",
+        "emp_no", "biometric_id", "position", "class_type", "sub_class", "shift_id",
         "department_id", "branch_id", "supervisor_id", "emp_status", "hire_date",
         "date_reg_contract", "educational_attainment", "recommended_by", "is_active",
         "user_id", "salary", "payroll_frequency", "bank_name", "bank_account_no",
@@ -273,7 +280,7 @@ def export_employee_template():
         "Jane", "P.", "Doe", "Jr.", "FEMALE", "1990-01-15", "SINGLE",
         "jane.doe@example.com", "09171234567", "123 Main St, City", "456 Rural Rd, Province",
         "EMP-002", "BIO-5678", "Software Engineer", "Core", "Backend",
-        "1", "1", "", "REGULAR", "2020-03-01", "2020-09-01", "BS Computer Science", "HR Dept", "True",
+        "1", "1", "1", "", "REGULAR", "2020-03-01", "2020-09-01", "BS Computer Science", "HR Dept", "True",
         "", "50000.00", "MONTHLY", "BDO", "1234567890",
         "123-456-789-000", "00-1234567-8", "123456789012", "123456789012", "NID-123456789"
     ])
@@ -321,7 +328,7 @@ async def import_employees(
             if 'salary' in employee_in_data and employee_in_data['salary']:
                 employee_in_data['salary'] = float(employee_in_data['salary'])
             
-            for field in ['department_id', 'branch_id', 'user_id', 'supervisor_id']:
+            for field in ['department_id', 'branch_id', 'user_id', 'supervisor_id', 'shift_id']:
                 if field in employee_in_data and employee_in_data[field]:
                     employee_in_data[field] = int(employee_in_data[field])
 

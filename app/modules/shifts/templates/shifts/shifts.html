@@ -1,0 +1,49 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Shift Management{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Shift <span class="text-primary italic">Management</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Configure and manage work schedules</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/shifts/create" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add Shift</a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="min-w-full leading-normal">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Shift Name</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Start Time</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">End Time</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Description</th>
+                    <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for shift in shifts %}
+                <tr id="shift-row-{{ shift.id }}" class="hover:bg-primary/[0.02] transition-colors">
+                    <td class="px-6 py-4">
+                        <p class="text-text-main text-sm font-semibold">{{ shift.name }}</p>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ shift.start_time.strftime('%H:%M') }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ shift.end_time.strftime('%H:%M') }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ shift.description or '-' }}</td>
+                    <td class="px-6 py-4 text-right text-sm">
+                        <div class="flex items-center justify-end gap-3">
+                            <a href="/shifts/{{ shift.id }}/edit" class="text-indigo-600 hover:underline">Edit</a>
+                            <button hx-delete="/shifts/{{ shift.id }}" hx-confirm="Are you sure? This may affect employees assigned to this shift." hx-target="#shift-row-{{ shift.id }}" hx-swap="outerHTML" class="text-red-500 hover:underline">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

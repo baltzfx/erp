@@ -9,6 +9,8 @@ from app.modules.permissions.router import router as permissions
 from app.modules.branch.router import router as branch
 from app.modules.department.router import router as department
 from app.modules.employee.router import router as employee
+from app.modules.attendance.router import router as attendance
+from app.modules.shifts.router import router as shifts
 
 api = APIRouter()
 
@@ -21,3 +23,5 @@ api.include_router(permissions, prefix="/permissions", tags=["permissions"])
 api.include_router(branch, prefix="/branch", tags=["branch"])
 api.include_router(department, prefix="/department", tags=["department"])
 api.include_router(employee, prefix="/employees", tags=["employees"])
+api.include_router(attendance, prefix="/attendance", tags=["attendance"])
+api.include_router(shifts, prefix="/shifts", tags=["shifts"])

@@ -6,9 +6,18 @@
 <div class="space-y-8">
     <div class="flex items-center justify-between">
         <h1 class="text-2xl text-text-main tracking-tight">Overview</h1>
-        <div class="flex gap-3">
-            <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">Export PDF</button>
-            <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">New Report</button>
+        <div class="flex items-center gap-6">
+            <!-- Clock In/Out Section -->
+            <div hx-get="/attendance/clock-status" hx-trigger="load" hx-swap="outerHTML">
+                <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-xl bg-primary/10 h-10 w-24"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">Export PDF</button>
+                <button class="px-4 py-2 bg-bg-main border border-primary/20 rounded-xl text-sm text-text-main hover:bg-primary/5 transition">New Report</button>
+            </div>
         </div>
     </div>
 

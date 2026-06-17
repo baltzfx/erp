@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from typing import Optional, List, TYPE_CHECKING
 from sqlalchemy import Boolean, Date, Enum, ForeignKey, Index, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, backref, relationship, validates
@@ -7,6 +7,8 @@ if TYPE_CHECKING:
     from app.modules.users.model import User
     from app.modules.department.model import Department
     from app.modules.branch.model import Branch
+    from app.modules.attendance.model import Attendance
+    from app.modules.shifts.model import Shift
 
 from app.shared.models import BaseModel
 from .schema import CivilStatusEnum, EmpStatusEnum, GenderEnum, PayrollFreqEnum
@@ -47,6 +49,7 @@ class Employee(BaseModel):
     emp_status: Mapped[Optional[EmpStatusEnum]] = mapped_column(Enum(EmpStatusEnum), nullable=True)
     hire_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     date_reg_contract: Mapped[Optional[date]] = mapped_column(Date, nullable=True)    # Regularization date tracking
+    shift_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("shifts.id"), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     
     # Background & Referrals
@@ -57,6 +60,8 @@ class Employee(BaseModel):
     user: Mapped[Optional["User"]] = relationship("User", back_populates="employee")
     department: Mapped[Optional["Department"]] = relationship("Department", back_populates="employees")
     branch: Mapped[Optional["Branch"]] = relationship("Branch", back_populates="employees")
+    attendances: Mapped[List["Attendance"]] = relationship("Attendance", back_populates="employee", cascade="all, delete-orphan")
+    shift: Mapped[Optional["Shift"]] = relationship("Shift", back_populates="employees")
     
     # Self-referencing link for dynamic multi-level management tracking
     subordinates = relationship("Employee", backref=backref("supervisor", remote_side="Employee.id"))
@@ -70,6 +75,14 @@ class Employee(BaseModel):
         if self.payroll_config and self.payroll_config.salary is not None:
             return float(self.payroll_config.salary)
         return None
+
+    @property
+    def shift_start(self) -> Optional[time]:
+        return self.shift.start_time if self.shift else None
+
+    @property
+    def shift_end(self) -> Optional[time]:
+        return self.shift.end_time if self.shift else None
     
     @validates("first_name", "last_name", "middle_name", "suffix")
     def validate_proper(self, key: str, value: Optional[str]) -> Optional[str]:

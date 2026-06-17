@@ -83,6 +83,7 @@ class EmployeeBase(BaseModel):
     class_type: Optional[str] = None
     sub_class: Optional[str] = None
     department_id: Optional[int] = None
+    shift_id: Optional[int] = None
     branch_id: Optional[int] = None
     supervisor_id: Optional[int] = None
     emp_status: Optional[EmpStatusEnum] = None
@@ -124,6 +125,7 @@ class EmployeeUpdate(BaseModel):
     class_type: Optional[str] = None
     sub_class: Optional[str] = None
     department_id: Optional[int] = None
+    shift_id: Optional[int] = None
     branch_id: Optional[int] = None
     supervisor_id: Optional[int] = None
     emp_status: Optional[EmpStatusEnum] = None

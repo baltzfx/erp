@@ -1,0 +1,42 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Leave Requests{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Leave <span class="text-primary italic">Requests</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Manage employee leave requests</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/leave/create" hx-target="#main-content" hx-select="#main-content" class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20">Add Leave</a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="min-w-full leading-normal">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Employee ID</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Type</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Dates</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for req in leave_requests %}
+                <tr id="leave-row-{{ req.id }}" class="hover:bg-primary/[0.02] transition-colors">
+                    <td class="px-6 py-4">
+                        <p class="text-text-main text-sm font-semibold">{{ req.employee_id }}</p>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ req.leave_type.value }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ req.start_date }} - {{ req.end_date }}</td>
+                    <td class="px-6 py-4 text-sm text-text-main/70">{{ req.status.value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -11,6 +11,8 @@ from app.modules.department.router import router as department
 from app.modules.employee.router import router as employee
 from app.modules.attendance.router import router as attendance
 from app.modules.shifts.router import router as shifts
+from app.modules.holiday.router import router as holiday
+from app.modules.leave.router import router as leave
 
 api = APIRouter()
 
@@ -25,3 +27,5 @@ api.include_router(department, prefix="/department", tags=["department"])
 api.include_router(employee, prefix="/employees", tags=["employees"])
 api.include_router(attendance, prefix="/attendance", tags=["attendance"])
 api.include_router(shifts, prefix="/shifts", tags=["shifts"])
+api.include_router(holiday, prefix="/holiday", tags=["holiday"])
+api.include_router(leave, prefix="/leave", tags=["leave"])

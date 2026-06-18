@@ -213,7 +213,7 @@
 
         <div x-show="open && isSidebarOpen" x-collapse>
           <ul class="pt-1 ps-8 space-y-1">
-            <li><a class="flex items-center gap-x-3.5 py-1.5 px-2.5 text-sm text-text-muted hover:text-primary rounded-md" href="/auth/login">Logout</a></li>
+            <li><a class="flex items-center gap-x-3.5 py-1.5 px-2.5 text-sm text-text-muted hover:text-primary rounded-md" href="/users/{{ user.id }}/view" >Profile</a></li>
           </ul>
         </div>
       </li>

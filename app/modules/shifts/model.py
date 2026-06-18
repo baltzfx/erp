@@ -1,5 +1,5 @@
 from datetime import time
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 from sqlalchemy import String, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.shared.models import BaseModel
@@ -15,6 +15,7 @@ class Shift(BaseModel):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     # Relationships
     employees: Mapped[List["Employee"]] = relationship("Employee", back_populates="shift")

@@ -6,6 +6,7 @@ class ShiftBase(BaseModel):
     name: str
     start_time: time
     end_time: time
+    description: Optional[str] = None
 
 class ShiftCreate(ShiftBase):
     pass
@@ -14,6 +15,7 @@ class ShiftUpdate(BaseModel):
     name: Optional[str] = None
     start_time: Optional[time] = None
     end_time: Optional[time] = None
+    description: Optional[str] = None
 
 class ShiftOut(ShiftBase):
     id: int

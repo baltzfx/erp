@@ -47,9 +47,9 @@ async def create_holiday(
     name: Annotated[str, Form(...)],
     holiday_date: Annotated[date, Form(alias="date")],
     holiday_type: Annotated[model.HolidayType, Form(...)],
-    description: Annotated[Optional[str], Form()] = None,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(deps.get_current_user)]
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    description: Annotated[Optional[str], Form()] = None
 ):
     holiday_in = schema.HolidayCreate(
         name=name,

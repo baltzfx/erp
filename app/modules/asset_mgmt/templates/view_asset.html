@@ -1,0 +1,321 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}View Asset{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="/assets" hx-boost="true" class="p-2 rounded-xl hover:bg-primary/10 text-primary transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">{{ asset.name }}</h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Asset Tag: {{ asset.serial_number or 'N/A' }}</p>
+        </div>
+        <div class="ml-auto flex gap-2">
+            <span class="px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest bg-primary/10 text-primary">
+                {{ asset.status.value }}
+            </span>
+            <a href="/assets/{{ asset.id }}/edit" class="px-5 py-2.5 bg-bg-main border border-primary/20 text-primary rounded-xl hover:bg-primary/10 transition-all font-bold text-sm">
+                Edit Asset
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Asset Details -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Details</h3>
+                <div class="grid grid-cols-2 gap-y-4 gap-x-8">
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Category</div>
+                        <div class="text-text-main">{{ asset.category.name if asset.category else 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Location</div>
+                        <div class="text-text-main">{{ asset.location or 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Purchase Date</div>
+                        <div class="text-text-main">{{ asset.purchase_date or 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Purchase Cost</div>
+                        <div class="text-text-main">{{ '$%.2f'|format(asset.purchase_cost) if asset.purchase_cost else 'N/A' }}</div>
+                    </div>
+                    <div class="col-span-2">
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Description</div>
+                        <div class="text-text-main text-sm opacity-80">{{ asset.description or 'No description provided.' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Depreciation & Lifecycle Specifications -->
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Financials & Specs</h3>
+                <div class="grid grid-cols-2 gap-y-4 gap-x-8">
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Salvage Value</div>
+                        <div class="text-text-main">{{ '$%.2f'|format(asset.salvage_value) if asset.salvage_value else 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Useful Life</div>
+                        <div class="text-text-main">{{ asset.useful_life_years ~ ' Years' if asset.useful_life_years else 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Current Book Value</div>
+                        <div class="text-text-main font-bold text-primary">{{ '$%.2f'|format(depreciation.book_value) if depreciation else 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Total Cost of Ownership</div>
+                        <div class="text-text-main font-bold text-primary">{{ '$%.2f'|format(depreciation.total_cost_of_ownership) if depreciation else 'N/A' }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Type</div>
+                        <div class="flex gap-2">
+                            <span class="px-2 py-1 bg-primary/10 text-primary text-xs rounded font-bold">{{ asset.asset_type.value }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-text-main opacity-50 mb-1 font-bold uppercase tracking-widest">Licenses / Quantity</div>
+                        <div class="text-text-main text-sm">
+                            {% if asset.total_seats %}
+                                Seats: {{ asset.consumed_seats or 0 }} / {{ asset.total_seats }}
+                            {% elif asset.quantity %}
+                                Qty: {{ asset.quantity }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Internal Components -->
+            {% if asset.asset_type.value not in ['COMPONENT', 'CONSUMABLE', 'ACCESSORY'] %}
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Internal Components</h3>
+                {% if asset.components %}
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-primary/5 border-b border-primary/10">
+                            <th class="px-4 py-2 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Component</th>
+                            <th class="px-4 py-2 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Serial No</th>
+                            <th class="px-4 py-2 text-xs font-black uppercase tracking-widest text-text-main opacity-40 text-right">View</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-primary/5">
+                        {% for comp in asset.components %}
+                        <tr class="hover:bg-primary/5 transition-colors">
+                            <td class="px-4 py-2 font-bold text-text-main text-sm">{{ comp.name }}</td>
+                            <td class="px-4 py-2 text-sm text-text-main opacity-70">{{ comp.serial_number or 'N/A' }}</td>
+                            <td class="px-4 py-2 text-right flex gap-2 justify-end">
+                                <a href="/assets/{{ comp.id }}/view" class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded hover:bg-primary hover:text-white transition-all">Details</a>
+                                <form method="POST" action="/assets/{{ asset.id }}/components/{{ comp.id }}/remove" class="inline">
+                                    <button type="submit" class="px-3 py-1 bg-red-500/10 text-red-500 text-xs font-bold rounded hover:bg-red-500 hover:text-white transition-all" onclick="return confirm('Remove component from this asset?');">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-text-main opacity-50 text-sm italic py-2">No internal components installed.</div>
+                {% endif %}
+
+                <div class="mt-6 pt-4 border-t border-primary/10">
+                    <form method="POST" action="/assets/{{ asset.id }}/components/add" class="flex gap-2 items-center">
+                        <select name="component_id" required class="bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary flex-1">
+                            <option value="">Select available component to install...</option>
+                            {% for comp in available_components %}
+                            <option value="{{ comp.id }}">{{ comp.name }} ({{ comp.serial_number or 'No SN' }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-4 py-1.5 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20 whitespace-nowrap">Install Component</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Custody History -->
+            {% if asset.asset_type.value in ['COMPONENT', 'ACCESSORY'] or asset.parent_asset_id %}
+            <div class="bg-blue-500/10 border border-blue-500/20 shadow-xl rounded-2xl p-6 flex items-start gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><circle cx="12" cy="11" r="3"></circle></svg>
+                <div class="w-full">
+                    <h3 class="text-lg font-bold text-blue-500">Internal Component / Accessory</h3>
+                    <p class="text-text-main opacity-70 text-sm mt-1 mb-4">This item is a physical component or accessory. Its custody is tied permanently to the life and location of its parent system ({% if asset.parent_asset %}<a href="/assets/{{ asset.parent_asset.id }}/view" class="font-bold hover:underline text-primary">{{ asset.parent_asset.name }}</a>{% else %}None currently{% endif %}).</p>
+                    
+                    {% if not asset.parent_asset_id %}
+                    <form method="POST" action="/assets/{{ asset.id }}/assign-parent" class="flex gap-2 items-center mt-4 pt-4 border-t border-blue-500/20">
+                        <select name="parent_asset_id" required class="bg-bg-main border border-blue-500/30 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 flex-1">
+                            <option value="">Select parent asset to assign to...</option>
+                            {% for a in available_parents %}
+                            <option value="{{ a.id }}">{{ a.name }} ({{ a.serial_number or 'No SN' }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-4 py-1.5 bg-blue-500 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 whitespace-nowrap">Assign to Parent</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+                <div class="p-6 border-b border-primary/10 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-text-main">Custody Assignments</h3>
+                    
+                    {% if asset.status.value == 'AVAILABLE' %}
+                    <form method="POST" action="/assets/{{ asset.id }}/assign" class="flex gap-2 items-center" x-data="{ assignType: 'employee' }">
+                        <select x-model="assignType" class="bg-primary/5 border border-primary/20 rounded-xl px-3 py-1.5 text-primary text-sm focus:border-primary focus:ring-1 focus:ring-primary font-bold">
+                            <option value="employee">Employee</option>
+                            <option value="org_unit">Dept/Team</option>
+                        </select>
+                        <select name="employee_id" x-show="assignType === 'employee'" :required="assignType === 'employee'" class="bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary min-w-[150px]">
+                            <option value="">Select Employee...</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <select name="org_unit_id" x-show="assignType === 'org_unit'" :required="assignType === 'org_unit'" class="bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary min-w-[150px]" style="display: none;">
+                            <option value="">Select Department...</option>
+                            {% for org in org_units %}
+                            <option value="{{ org.id }}">{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-4 py-1.5 bg-primary text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all">Assign</button>
+                    </form>
+                    {% elif asset.status.value == 'DEPLOYED' %}
+                    <form method="POST" action="/assets/{{ asset.id }}/return">
+                        <button type="submit" class="px-4 py-1.5 bg-yellow-500 text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-yellow-500/20">Return to Inventory</button>
+                    </form>
+                    {% endif %}
+                </div>
+                
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-primary/5 border-b border-primary/10">
+                            <th class="px-6 py-3 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Assignee</th>
+                            <th class="px-6 py-3 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Assigned</th>
+                            <th class="px-6 py-3 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Returned</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-primary/5">
+                        {% for assignment in asset.assignments %}
+                        <tr class="hover:bg-primary/5 transition-colors">
+                            <td class="px-6 py-3">
+                                {% if assignment.employee %}
+                                <div class="font-bold text-text-main text-sm">
+                                    <span class="text-[10px] uppercase tracking-widest text-primary mr-1 border border-primary/20 px-1.5 py-0.5 rounded-md">Emp</span>
+                                    {{ assignment.employee.first_name }} {{ assignment.employee.last_name }}
+                                </div>
+                                {% elif assignment.org_unit %}
+                                <div class="font-bold text-text-main text-sm">
+                                    <span class="text-[10px] uppercase tracking-widest text-primary mr-1 border border-primary/20 px-1.5 py-0.5 rounded-md">Org</span>
+                                    {{ assignment.org_unit.name }}
+                                </div>
+                                {% else %}
+                                <div class="font-bold text-text-main text-sm text-opacity-50">Unknown</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-3 text-sm text-text-main opacity-70">{{ assignment.assigned_date.strftime('%Y-%m-%d') }}</td>
+                            <td class="px-6 py-3 text-sm text-text-main opacity-70">
+                                {% if assignment.return_date %}
+                                    {{ assignment.return_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    <span class="text-green-500 font-bold text-xs uppercase">Current</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not asset.assignments %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-8 text-center text-text-main opacity-40 italic text-sm">No custody records found.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Maintenance & Audit -->
+        <div class="space-y-6">
+
+            <!-- Lifecycle Actions -->
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Lifecycle Actions</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <form method="POST" action="/api/assets/{{ asset.id }}/audit" class="col-span-2">
+                        <button type="submit" class="w-full px-4 py-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-xl text-sm font-bold transition-all border border-blue-500/20">
+                            Log Audit Checkpoint
+                        </button>
+                    </form>
+
+                    <form method="POST" action="/api/assets/{{ asset.id }}/lost-stolen" class="col-span-1">
+                        <button type="submit" class="w-full px-4 py-2 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white rounded-xl text-sm font-bold transition-all border border-yellow-500/20" onclick="return confirm('Mark as Lost/Stolen?');">
+                            Lost/Stolen
+                        </button>
+                    </form>
+
+                    <form method="POST" action="/api/assets/{{ asset.id }}/dispose" class="col-span-1">
+                        <button type="submit" class="w-full px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl text-sm font-bold transition-all border border-red-500/20" onclick="return confirm('Permanently dispose this asset?');">
+                            Dispose
+                        </button>
+                    </form>
+                </div>
+                
+                <form method="POST" action="/api/assets/{{ asset.id }}/report-issue" class="mt-4 pt-4 border-t border-primary/10 space-y-3">
+                    <h4 class="text-sm font-bold text-text-main">Report an Issue</h4>
+                    <input type="text" name="description" placeholder="Describe the problem..." required class="w-full bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                    <button type="submit" class="w-full px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl text-sm font-bold transition-all">Report Issue</button>
+                </form>
+            </div>
+
+            
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Maintenance</h3>
+                <div class="space-y-4">
+                    {% for m in asset.maintenance_records %}
+                    <div class="border border-primary/10 rounded-xl p-3 bg-primary/5">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="text-xs font-bold uppercase tracking-widest text-primary">{{ m.status.value }}</div>
+                            <div class="text-xs text-text-main opacity-50">{{ m.scheduled_date }}</div>
+                        </div>
+                        <div class="text-sm text-text-main mb-2">{{ m.description or 'No details' }}</div>
+                        {% if m.cost %}
+                        <div class="text-xs font-bold text-text-main opacity-80">Cost: ${{ m.cost }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% if not asset.maintenance_records %}
+                    <div class="text-center text-text-main opacity-40 italic text-sm py-2">No maintenance records.</div>
+                    {% endif %}
+                </div>
+
+                <form method="POST" action="/assets/{{ asset.id }}/maintenance" class="mt-4 pt-4 border-t border-primary/10 space-y-3">
+                    <h4 class="text-sm font-bold text-text-main">Schedule Maintenance</h4>
+                    <input type="date" name="scheduled_date" required class="w-full bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                    <input type="text" name="description" placeholder="Description..." class="w-full bg-bg-main border border-primary/20 rounded-xl px-3 py-1.5 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                    <button type="submit" class="w-full px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl text-sm font-bold transition-all">Schedule</button>
+                </form>
+            </div>
+
+            <!-- Audit History -->
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Activity Log</h3>
+                <div class="space-y-4 max-h-[300px] overflow-y-auto">
+                    {% for log in asset.history_records %}
+                    <div class="relative pl-4 border-l-2 border-primary/20 pb-2">
+                        <div class="absolute w-2 h-2 rounded-full bg-primary -left-[5px] top-1.5"></div>
+                        <div class="text-xs text-text-main opacity-50">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                        <div class="text-sm font-bold text-text-main">{{ log.action }}</div>
+                        <div class="text-xs text-text-main opacity-70">{{ log.details }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

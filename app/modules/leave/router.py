@@ -85,3 +85,46 @@ async def edit_leave_request_page(
             "leave_statuses": model.LeaveStatus
         }
     )
+
+@router.post("/{leave_id}/edit")
+async def edit_leave_request(
+    leave_id: int,
+    employee_id: Annotated[int, Form(...)],
+    start_date: Annotated[date, Form(...)],
+    end_date: Annotated[date, Form(...)],
+    leave_type: Annotated[model.LeaveType, Form(...)],
+    status: Annotated[model.LeaveStatus, Form(...)],
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    reason: Annotated[Optional[str], Form()] = None
+):
+    leave_update = schema.LeaveRequestUpdate(
+        employee_id=employee_id,
+        start_date=start_date,
+        end_date=end_date,
+        leave_type=leave_type,
+        status=status,
+        reason=reason
+    )
+    service.update_leave_request(db, leave_id, leave_update)
+    return RedirectResponse(url="/leave/", status_code=303)
+
+@router.post("/{leave_id}/approve")
+async def approve_leave_request(
+    leave_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    leave_update = schema.LeaveRequestUpdate(status=model.LeaveStatus.APPROVED)
+    service.update_leave_request(db, leave_id, leave_update)
+    return RedirectResponse(url="/leave/", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/{leave_id}/reject")
+async def reject_leave_request(
+    leave_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    leave_update = schema.LeaveRequestUpdate(status=model.LeaveStatus.REJECTED)
+    service.update_leave_request(db, leave_id, leave_update)
+    return RedirectResponse(url="/leave/", status_code=status.HTTP_303_SEE_OTHER)

@@ -9,19 +9,19 @@
         <p class="text-text-main opacity-50 text-sm mt-1">Modify an existing leave request</p>
     </div>
 
-    <form action="/leave/{{ leave.id }}/edit" method="POST" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
+    <form action="/leave/{{ leave_request.id }}/edit" method="POST" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
         <div class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Employee ID</label>
-                    <input type="number" name="employee_id" required value="{{ leave.employee_id }}"
+                    <input type="number" name="employee_id" required value="{{ leave_request.employee_id }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</label>
                     <select name="status" required class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
-                        {% for type in status_types %}
-                            <option value="{{ type.value }}" {% if leave.status == type %}selected{% endif %}>{{ type.value }}</option>
+                        {% for status in leave_statuses %}
+                            <option value="{{ status.value }}" {% if leave_request.status == status %}selected{% endif %}>{{ status.value }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -30,12 +30,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Start Date</label>
-                    <input type="date" name="start_date" required value="{{ leave.start_date }}"
+                    <input type="date" name="start_date" required value="{{ leave_request.start_date }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">End Date</label>
-                    <input type="date" name="end_date" required value="{{ leave.end_date }}"
+                    <input type="date" name="end_date" required value="{{ leave_request.end_date }}"
                         class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                 </div>
             </div>
@@ -44,7 +44,7 @@
                 <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Leave Type</label>
                 <select name="leave_type" required class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
                     {% for type in leave_types %}
-                        <option value="{{ type.value }}" {% if leave.leave_type == type %}selected{% endif %}>{{ type.value }}</option>
+                        <option value="{{ type.value }}" {% if leave_request.leave_type == type %}selected{% endif %}>{{ type.value }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -52,7 +52,7 @@
             <div class="space-y-1">
                 <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Reason</label>
                 <textarea name="reason" rows="3"
-                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">{{ leave.reason or '' }}</textarea>
+                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">{{ leave_request.reason or '' }}</textarea>
             </div>
         </div>
 

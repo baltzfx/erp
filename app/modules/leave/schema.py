@@ -14,6 +14,7 @@ class LeaveRequestCreate(LeaveRequestBase):
     pass
 
 class LeaveRequestUpdate(BaseModel):
+    employee_id: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     leave_type: Optional[LeaveType] = None

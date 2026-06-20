@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, backref, relationship, validat
 
 if TYPE_CHECKING:
     from app.modules.users.model import User
-    from app.modules.department.model import Department
+    from app.modules.department.model import OrgUnit
     from app.modules.branch.model import Branch
     from app.modules.attendance.model import Attendance
     from app.modules.shifts.model import Shift
@@ -42,7 +42,7 @@ class Employee(BaseModel):
     
     # Employment Details
     branch_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("branches.id"), nullable=True)
-    department_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("departments.id"), nullable=True)
+    department_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("org_units.id"), nullable=True)
     class_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Core categorization
     sub_class: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)    # Branch sub-grouping
     position: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)      # Specific structural job title
@@ -58,7 +58,7 @@ class Employee(BaseModel):
     
     # Relationships
     user: Mapped[Optional["User"]] = relationship("User", back_populates="employee")
-    department: Mapped[Optional["Department"]] = relationship("Department", back_populates="employees")
+    org_unit: Mapped[Optional["OrgUnit"]] = relationship("OrgUnit", back_populates="employees")
     branch: Mapped[Optional["Branch"]] = relationship("Branch", back_populates="employees")
     attendances: Mapped[List["Attendance"]] = relationship("Attendance", back_populates="employee", cascade="all, delete-orphan")
     shift: Mapped[Optional["Shift"]] = relationship("Shift", back_populates="employees")
@@ -97,7 +97,7 @@ class Employee(BaseModel):
         return self.to_numbers(value) if value else value
 
     __table_args__ = (
-        Index("idx_employee_department", "department_id"),
+        Index("idx_employee_org_unit", "department_id"),
         Index("idx_employee_branch", "branch_id"),
         Index("idx_employee_active", "is_active"),
     )

@@ -1,0 +1,65 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Asset Categories{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Asset <span class="text-primary italic">Categories</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Manage categories for organizing inventory</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/asset-categories/create" 
+               hx-target="#main-content" 
+               hx-select="#main-content"
+               hx-swap="innerHTML"
+               class="px-5 py-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Category
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40 w-1/4">Name</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for cat in categories %}
+                <tr class="hover:bg-primary/5 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-text-main">{{ cat.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">
+                        {{ cat.description or 'No description provided.' }}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="/asset-categories/{{ cat.id }}/edit" class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </a>
+                            <button hx-delete="/asset-categories/{{ cat.id }}" hx-confirm="Are you sure you want to delete this category?" hx-target="closest tr" hx-swap="outerHTML" class="p-2 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not categories %}
+                <tr>
+                    <td colspan="3" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                        No categories found. Click "Add Category" to create one.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

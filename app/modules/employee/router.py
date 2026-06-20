@@ -38,7 +38,7 @@ async def create_employee_page(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(deps.get_current_user)]
 ):
-    departments = dept_service.get_departments(db)
+    org_units = dept_service.get_org_units(db)
     branches = branch_service.get_branches(db)
     users = user_service.get_users(db)
     supervisors = service.get_employees(db)
@@ -52,7 +52,7 @@ async def create_employee_page(
             "shifts": shifts,
             "theme": theme, 
             "user": current_user,
-            "departments": departments,
+            "org_units": org_units,
             "branches": branches,
             "users": users,
             "supervisors": supervisors,
@@ -121,7 +121,7 @@ async def edit_employee_page(
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
         
-    departments = dept_service.get_departments(db)
+    org_units = dept_service.get_org_units(db)
     branches = branch_service.get_branches(db)
     users = user_service.get_users(db)
     supervisors = service.get_employees(db)
@@ -136,7 +136,7 @@ async def edit_employee_page(
             "employee": employee, 
             "theme": theme, 
             "user": current_user,
-            "departments": departments,
+            "org_units": org_units,
             "branches": branches,
             "users": users,
             "supervisors": supervisors,

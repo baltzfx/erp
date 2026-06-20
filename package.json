@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build:css": "tailwindcss -i app/core/static/css/input.css -o app/core/static/dist/output.css"
+  },
   "dependencies": {
     "@tailwindcss/cli": "^4.3.0",
     "htmx-ext-json-enc": "^2.0.3",

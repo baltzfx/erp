@@ -118,11 +118,12 @@
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Department</label>
                     <select name="department_id" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
-                        <option value="">Select Department</option>
-                        {% for dept in departments %}
-                        <option value="{{ dept.id }}" {% if employee.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                        <option value="">Select Unit</option>
+                        {% for unit in org_units %}
+                            <option value="{{ unit.id }}" {% if employee.department_id == unit.id %}selected{% endif %}>{{ unit.name }} ({{ unit.unit_type.value }})</option>
                         {% endfor %}
                     </select>
+
                 </div>
                 <div class="space-y-1">
                     <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Branch</label>

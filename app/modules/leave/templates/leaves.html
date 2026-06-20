@@ -18,21 +18,49 @@
         <table class="min-w-full leading-normal">
             <thead>
                 <tr class="bg-primary/5 border-b border-primary/10">
-                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Employee ID</th>
+                    <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Employee</th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Type</th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Dates</th>
                     <th class="px-6 py-4 text-left text-xs text-text-main opacity-40 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-xs text-text-main opacity-40 uppercase tracking-widest">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-primary/5">
                 {% for req in leave_requests %}
                 <tr id="leave-row-{{ req.id }}" class="hover:bg-primary/[0.02] transition-colors">
                     <td class="px-6 py-4">
-                        <p class="text-text-main text-sm font-semibold">{{ req.employee_id }}</p>
+                        <div class="flex items-center gap-3">
+                            <div class="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                                {{ req.employee.first_name[0] if req.employee else '?' }}{{ req.employee.last_name[0] if req.employee else '?' }}
+                            </div>
+                            <p class="text-text-main text-sm font-semibold">
+                                {{ req.employee.first_name if req.employee else 'Unknown' }} {{ req.employee.last_name if req.employee else '' }}
+                            </p>
+                        </div>
                     </td>
                     <td class="px-6 py-4 text-sm text-text-main/70">{{ req.leave_type.value }}</td>
                     <td class="px-6 py-4 text-sm text-text-main/70">{{ req.start_date }} - {{ req.end_date }}</td>
-                    <td class="px-6 py-4 text-sm text-text-main/70">{{ req.status.value }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="px-2.5 py-1 text-xs font-medium rounded-full 
+                            {% if req.status.value == 'APPROVED' %}bg-green-100 text-green-700
+                            {% elif req.status.value == 'REJECTED' %}bg-red-100 text-red-700
+                            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                            {{ req.status.value }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm">
+                        <div class="flex items-center justify-end gap-2">
+                            {% if req.status.value == 'PENDING' %}
+                            <form hx-post="/leave/{{ req.id }}/approve" hx-target="#main-content" hx-select="#main-content" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xs">Approve</button>
+                            </form>
+                            <form hx-post="/leave/{{ req.id }}/reject" hx-target="#main-content" hx-select="#main-content" class="inline">
+                                <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-xs">Reject</button>
+                            </form>
+                            {% endif %}
+                            <a href="/leave/{{ req.id }}/edit" hx-target="#main-content" hx-select="#main-content" class="text-primary hover:underline text-xs">Edit</a>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

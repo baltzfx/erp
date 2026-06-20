@@ -1,7 +1,8 @@
 import os
+from typing import Annotated
 from pathlib import Path
 import uvicorn
-from fastapi import FastAPI, Request, Response, Form, HTTPException, status
+from fastapi import FastAPI, Request, Response, Form, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -10,19 +11,22 @@ from app.shared.models import BaseModel
 # Import all models to ensure they are registered with BaseModel.metadata
 from app.modules.users.model import User
 from app.modules.roles.model import Role
-from app.modules.permissions.model import Permission
+from app.modules.permissions.model import Permission 
 from app.modules.employee.model import Employee
 from app.modules.branch.model import Branch
-from app.modules.department.model import Department
+from app.modules.department.model import OrgUnitType
 from app.modules.attendance.model import Attendance
 from app.modules.leave.model import LeaveRequest
 from app.modules.holiday.model import Holiday
+from app.modules.shifts.model import Shift
+from app.modules.asset_mgmt.model import Asset, AssetCategory, AssetAssignment, AssetRequest, AssetMaintenance, AssetHistory, BulkJob
 
 # Create database tables
 BaseModel.metadata.create_all(bind=engine)
 
 from app.api.router import api
 from app.core.templates import templates
+from app.api import deps
 
 app = FastAPI()
 
@@ -47,13 +51,13 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(api)
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request, current_user: Annotated[User, Depends(deps.get_current_user)]):
     # Get theme from cookie, default to 'light'
     theme = request.cookies.get("theme", "light")
     return templates.TemplateResponse(
         request=request, 
         name="index.html",
-        context={"theme": theme}
+        context={"theme": theme, "user": current_user}
     )
 
 @app.post("/set-theme")

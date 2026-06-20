@@ -1,13 +1,13 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from .model import LeaveRequest
 from .schema import LeaveRequestCreate, LeaveRequestUpdate
 
 def get_leave_request(db: Session, leave_request_id: int) -> Optional[LeaveRequest]:
-    return db.query(LeaveRequest).filter(LeaveRequest.id == leave_request_id).first()
+    return db.query(LeaveRequest).options(joinedload(LeaveRequest.employee)).filter(LeaveRequest.id == leave_request_id).first()
 
 def get_leave_requests(db: Session, skip: int = 0, limit: int = 100) -> List[LeaveRequest]:
-    return db.query(LeaveRequest).order_by(LeaveRequest.start_date.desc()).offset(skip).limit(limit).all()
+    return db.query(LeaveRequest).options(joinedload(LeaveRequest.employee)).order_by(LeaveRequest.start_date.desc()).offset(skip).limit(limit).all()
 
 def create_leave_request(db: Session, leave_request: LeaveRequestCreate) -> LeaveRequest:
     db_leave_request = LeaveRequest(**leave_request.model_dump())

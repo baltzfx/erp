@@ -1,0 +1,142 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}My Asset Requests{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-5xl mx-auto">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">My Asset <span class="text-primary italic">Requests</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Request new equipment or track your existing requests</p>
+        </div>
+    </div>
+
+    <!-- Request Form -->
+    {% if user.employee %}
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6 mb-8">
+        <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Submit New Request</h3>
+        <form method="POST" action="/assets/requests" class="space-y-4" x-data="{ targetType: 'self' }">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2">Category Needed *</label>
+                    <select name="category_id" required class="w-full bg-bg-main border border-primary/20 rounded-xl px-4 py-2.5 text-text-main focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="">Select a category...</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2">Reason / Justification *</label>
+                    <input type="text" name="reason" required placeholder="e.g., Needed for new project X..." class="w-full bg-bg-main border border-primary/20 rounded-xl px-4 py-2.5 text-text-main focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2">Request For</label>
+                    <select name="target_type" x-model="targetType" class="w-full bg-bg-main border border-primary/20 rounded-xl px-4 py-2.5 text-text-main focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="self">Myself</option>
+                        <option value="other">Other Employee</option>
+                        <option value="org">Department/Team</option>
+                    </select>
+                </div>
+                
+                <div x-show="targetType === 'other'" style="display: none;">
+                    <label class="block text-sm font-bold text-text-main mb-2">Select Employee *</label>
+                    <select name="target_employee_id" :required="targetType === 'other'" class="w-full bg-bg-main border border-primary/20 rounded-xl px-4 py-2.5 text-text-main focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="">Select an employee...</option>
+                        {% for emp in employees %}
+                        <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div x-show="targetType === 'org'" style="display: none;">
+                    <label class="block text-sm font-bold text-text-main mb-2">Select Department/Team *</label>
+                    <select name="target_org_unit_id" :required="targetType === 'org'" class="w-full bg-bg-main border border-primary/20 rounded-xl px-4 py-2.5 text-text-main focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="">Select a unit...</option>
+                        {% for org in org_units %}
+                        <option value="{{ org.id }}">{{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="px-6 py-2 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                    Submit Request
+                </button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl p-6 mb-8">
+        <h3 class="text-lg font-bold border-b border-red-500/20 pb-4 mb-4">Action Required</h3>
+        <p>Your user account is not linked to an employee profile. You must be linked to an employee profile to submit asset requests. Please contact an administrator.</p>
+    </div>
+    {% endif %}
+
+    <!-- Requests History -->
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <div class="p-6 border-b border-primary/10 bg-primary/5">
+            <h3 class="text-lg font-bold text-text-main">Request History</h3>
+        </div>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Date</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Target</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Requested Item</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Reason</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for req in requests %}
+                <tr class="hover:bg-primary/5 transition-colors">
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">{{ req.request_date }}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-text-main">
+                            {% if req.target_employee %}
+                                <span class="text-[10px] uppercase tracking-widest text-primary mr-1 border border-primary/20 px-1 py-0.5 rounded-md">Emp</span>
+                                {{ req.target_employee.first_name }} {{ req.target_employee.last_name }}
+                            {% elif req.target_org_unit %}
+                                <span class="text-[10px] uppercase tracking-widest text-primary mr-1 border border-primary/20 px-1 py-0.5 rounded-md">Org</span>
+                                {{ req.target_org_unit.name }}
+                            {% else %}
+                                <span class="opacity-70 italic">Self</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-text-main font-bold">
+                            {% if req.category %}
+                                {{ req.category.name }}
+                            {% elif req.asset %}
+                                {{ req.asset.name }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-70">{{ req.reason or 'No reason provided' }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
+                            {% if req.status.value == 'APPROVED' %} bg-green-500/10 text-green-500 
+                            {% elif req.status.value == 'DECLINED' or req.status.value == 'REJECTED' %} bg-red-500/10 text-red-500
+                            {% else %} bg-yellow-500/10 text-yellow-500 {% endif %}">
+                            {{ req.status.value }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not requests %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                        You haven't made any asset requests yet.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

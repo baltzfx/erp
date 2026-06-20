@@ -13,6 +13,7 @@ from app.modules.attendance.router import router as attendance
 from app.modules.shifts.router import router as shifts
 from app.modules.holiday.router import router as holiday
 from app.modules.leave.router import router as leave
+from app.modules.asset_mgmt.router import router as asset_mgmt
 
 api = APIRouter()
 
@@ -29,3 +30,4 @@ api.include_router(attendance, prefix="/attendance", tags=["attendance"])
 api.include_router(shifts, prefix="/shifts", tags=["shifts"])
 api.include_router(holiday, prefix="/holiday", tags=["holiday"])
 api.include_router(leave, prefix="/leave", tags=["leave"])
+api.include_router(asset_mgmt, prefix="", tags=["asset_mgmt"])

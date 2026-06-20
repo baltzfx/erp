@@ -1,41 +1,44 @@
-from sqlalchemy.orm import Session
-from .model import Department
-from .schema import DepartmentCreate, DepartmentUpdate
+from sqlalchemy.orm import Session, joinedload
+from .model import OrgUnit
+from .schema import OrgUnitCreate, OrgUnitUpdate
 
-def get_department(db: Session, department_id: int):
-    return db.query(Department).filter(Department.id == department_id).first()
+def get_org_unit(db: Session, org_unit_id: int):
+    return db.query(OrgUnit).options(joinedload(OrgUnit.parent)).filter(OrgUnit.id == org_unit_id).first()
 
-def get_department_by_name(db: Session, name: str):
-    return db.query(Department).filter(Department.name == name).first()
+def get_org_unit_by_name(db: Session, name: str):
+    return db.query(OrgUnit).filter(OrgUnit.name == name).first()
 
-def get_departments(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Department).offset(skip).limit(limit).all()
+def get_org_units(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(OrgUnit).options(joinedload(OrgUnit.parent)).offset(skip).limit(limit).all()
 
-def create_department(db: Session, department: DepartmentCreate):
-    db_department = Department(name=department.name, description=department.description)
-    db.add(db_department)
+def get_org_units_tree(db: Session):
+    """Returns top-level units with their children loaded"""
+    return db.query(OrgUnit).filter(OrgUnit.parent_id == None).options(joinedload(OrgUnit.children)).all()
+
+def create_org_unit(db: Session, org_unit: OrgUnitCreate):
+    db_org_unit = OrgUnit(**org_unit.model_dump())
+    db.add(db_org_unit)
     db.commit()
-    db.refresh(db_department)
-    return db_department
+    db.refresh(db_org_unit)
+    return db_org_unit
 
-def update_department(db: Session, department_id: int, department: DepartmentUpdate):
-    db_department = get_department(db, department_id)
-    if not db_department:
+def update_org_unit(db: Session, org_unit_id: int, org_unit: OrgUnitUpdate):
+    db_org_unit = get_org_unit(db, org_unit_id)
+    if not db_org_unit:
         return None
     
-    update_data = department.model_dump(exclude_unset=True)
+    update_data = org_unit.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(db_department, key, value)
+        setattr(db_org_unit, key, value)
     
-    db.add(db_department)
     db.commit()
-    db.refresh(db_department)
-    return db_department
+    db.refresh(db_org_unit)
+    return db_org_unit
 
-def delete_department(db: Session, department_id: int):
-    db_department = get_department(db, department_id)
-    if not db_department:
+def delete_org_unit(db: Session, org_unit_id: int):
+    db_org_unit = get_org_unit(db, org_unit_id)
+    if not db_org_unit:
         return None
-    db.delete(db_department)
+    db.delete(db_org_unit)
     db.commit()
-    return db_department
+    return db_org_unit

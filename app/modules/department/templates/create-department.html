@@ -1,24 +1,45 @@
 {% extends "layout_dashboard.html" %}
 
-{% block title %}Add New Department{% endblock %}
+{% block title %}Add New Unit{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto p-6">
     <div class="mb-8">
-        <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Department</span></h1>
-        <p class="text-text-main opacity-50 text-sm mt-1">Create a new organizational department</p>
+        <h1 class="text-3xl font-black text-text-main tracking-tight">Add New <span class="text-primary italic">Unit</span></h1>
+        <p class="text-text-main opacity-50 text-sm mt-1">Create a new organizational unit (Department, Section, or Team)</p>
     </div>
 
     <form hx-post="/department/create" class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-8 space-y-6">
         <div class="space-y-4">
-            <div class="space-y-1">
-                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Department Name</label>
-                <input type="text" name="name" required placeholder="Human Resources"
-                    class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Unit Name</label>
+                    <input type="text" name="name" required placeholder="Human Resources"
+                        class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Unit Type</label>
+                    <select name="unit_type" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                        {% for type in unit_types %}
+                            <option value="{{ type.value }}">{{ type.value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Parent Unit</label>
+                <select name="parent_id" class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all">
+                    <option value="">None (Top Level)</option>
+                    {% for unit in org_units %}
+                        <option value="{{ unit.id }}">{{ unit.name }} ({{ unit.unit_type.value }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="space-y-1">
                 <label class="block text-xs font-black uppercase tracking-widest text-text-main opacity-40">Description</label>
-                <textarea name="description" placeholder="Manage employee relations and recruitment" rows="4"
+                <textarea name="description" placeholder="Manage employee relations and recruitment" rows="3"
                     class="block w-full px-4 py-3 bg-primary/5 border border-primary/10 rounded-xl text-text-main focus:ring-2 focus:ring-primary outline-none transition-all"></textarea>
             </div>
         </div>
@@ -26,7 +47,7 @@
         <div class="flex justify-end gap-4 pt-6 border-t border-primary/5">
             <a href="/department/" class="px-6 py-3 text-text-main opacity-40 hover:opacity-100 font-bold transition-all uppercase tracking-widest text-xs flex items-center">Cancel</a>
             <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20">
-                Create Department
+                Create Unit
             </button>
         </div>
     </form>

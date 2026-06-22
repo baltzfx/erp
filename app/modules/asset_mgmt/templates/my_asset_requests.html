@@ -87,6 +87,7 @@
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Requested Item</th>
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Reason</th>
                     <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-primary/5">
@@ -126,11 +127,14 @@
                             {{ req.status.value }}
                         </span>
                     </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="/assets/requests/{{ req.id }}/view" class="inline-flex px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all">View</a>
+                    </td>
                 </tr>
                 {% endfor %}
                 {% if not requests %}
                 <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                    <td colspan="6" class="px-6 py-12 text-center text-text-main opacity-40 italic">
                         You haven't made any asset requests yet.
                     </td>
                 </tr>

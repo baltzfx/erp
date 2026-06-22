@@ -1,0 +1,105 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}View Request{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-5xl mx-auto">
+    <div class="flex items-center gap-4">
+        <a href="/assets/requests" class="p-2 rounded-xl hover:bg-primary/10 text-primary transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Request #{{ request_record.id }}</h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Submitted on {{ request_record.request_date }}</p>
+        </div>
+        <div class="ml-auto">
+            <span class="px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest bg-primary/10 text-primary">
+                {{ request_record.status.value }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Request Details</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm text-text-main">
+                    <div>
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Requester</div>
+                        <div class="mt-1 font-bold">{{ request_record.employee.first_name }} {{ request_record.employee.last_name }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Target</div>
+                        <div class="mt-1">
+                            {% if request_record.target_employee %}
+                                {{ request_record.target_employee.first_name }} {{ request_record.target_employee.last_name }}
+                            {% elif request_record.target_org_unit %}
+                                {{ request_record.target_org_unit.name }}
+                            {% else %}
+                                Self
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Requested Item</div>
+                        <div class="mt-1 font-bold">
+                            {% if request_record.asset %}
+                                {{ request_record.asset.name }}
+                            {% elif request_record.category %}
+                                {{ request_record.category.name }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Reason</div>
+                        <div class="mt-1">{{ request_record.reason or 'No reason provided' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if repair_request %}
+            <div class="bg-indigo-500/10 border border-indigo-500/20 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-indigo-500 border-b border-indigo-500/20 pb-4 mb-4">Linked Repair Ticket</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm text-text-main">
+                    <div>
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Repair Ticket</div>
+                        <div class="mt-1 font-bold">#{{ repair_request.id }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-black uppercase tracking-widest opacity-50">Repair Status</div>
+                        <div class="mt-1 font-bold text-indigo-500">{{ repair_request.status.value }}</div>
+                    </div>
+                    <div class="col-span-2">
+                        <a href="/assets/repair-requests" class="inline-flex px-4 py-2 rounded-xl bg-indigo-500 text-white text-sm font-bold hover:opacity-90 transition-all">
+                            Open Repair Queue
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-text-main border-b border-primary/10 pb-4 mb-4">Status</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-text-main opacity-60">Request ID</span>
+                        <span class="font-bold text-text-main">#{{ request_record.id }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-text-main opacity-60">Current State</span>
+                        <span class="font-bold text-primary">{{ request_record.status.value }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-text-main opacity-60">Requested</span>
+                        <span class="font-bold text-text-main">{{ request_record.request_date }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

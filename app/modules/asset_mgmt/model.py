@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from app.modules.department.model import OrgUnit
 
 from app.shared.models import BaseModel
-from .schema import AssetStatusEnum, AssignmentStatusEnum, RequestStatusEnum, MaintenanceStatusEnum, AssetTypeEnum
+from .schema import AssetStatusEnum, AssignmentStatusEnum, RequestStatusEnum, MaintenanceStatusEnum, RepairRequestStatusEnum, AssetTypeEnum
 
 class AssetCategory(BaseModel):
     __tablename__ = "asset_category"
@@ -96,6 +96,26 @@ class AssetRequest(BaseModel):
     employee: Mapped["Employee"] = relationship("Employee", foreign_keys=[employee_id])
     target_employee: Mapped[Optional["Employee"]] = relationship("Employee", foreign_keys=[target_employee_id])
     target_org_unit: Mapped[Optional["OrgUnit"]] = relationship("OrgUnit", foreign_keys=[target_org_unit_id])
+
+
+class AssetRepairRequest(BaseModel):
+    __tablename__ = "asset_repair_request"
+
+    asset_id: Mapped[int] = mapped_column(Integer, ForeignKey("asset.id", ondelete="CASCADE"), nullable=False)
+    requested_by_employee_id: Mapped[int] = mapped_column(Integer, ForeignKey("employee.id"), nullable=False)
+    repairman_employee_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("employee.id"), nullable=True)
+    request_date: Mapped[date] = mapped_column(Date, nullable=False)
+    received_by_repairman_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    repair_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    sent_back_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    received_by_user_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    status: Mapped[RepairRequestStatusEnum] = mapped_column(Enum(RepairRequestStatusEnum), default=RepairRequestStatusEnum.REQUESTED, nullable=False)
+    reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    repair_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    asset: Mapped["Asset"] = relationship("Asset")
+    requested_by_employee: Mapped["Employee"] = relationship("Employee", foreign_keys=[requested_by_employee_id])
+    repairman_employee: Mapped[Optional["Employee"]] = relationship("Employee", foreign_keys=[repairman_employee_id])
 
 
 class AssetMaintenance(BaseModel):

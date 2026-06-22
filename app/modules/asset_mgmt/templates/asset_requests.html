@@ -65,6 +65,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right" x-data="{ approveModalOpen: false }">
+                        <a href="/assets/requests/{{ req.id }}/view" class="inline-flex px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all mr-2">View</a>
                         {% if req.status.value == 'PENDING' %}
                         <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             {% if req.asset %}

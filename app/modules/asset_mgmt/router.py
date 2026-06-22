@@ -13,6 +13,13 @@ from app.modules.users.model import User
 
 router = APIRouter()
 
+
+def _can_manage_repair_queue(user: User) -> bool:
+    if user.is_superuser:
+        return True
+    role_name = (user.role.name if user.role else "").strip().lower()
+    return any(keyword in role_name for keyword in ("repair", "maintenance", "admin"))
+
 # ==========================================
 # ASSETS
 # ==========================================
@@ -27,10 +34,14 @@ async def list_assets(
 ):
     assets = db.query(model.Asset).filter(model.Asset.parent_asset_id == None).offset(skip).limit(limit).all()
     theme = request.cookies.get("theme", "light")
+    asset_ids = [asset.id for asset in assets]
+    asset_ids.extend(comp.id for asset in assets for comp in asset.components)
+    active_repairs = service.get_active_repair_requests_for_assets(db, asset_ids)
+    active_repair_map = {req.asset_id: req for req in active_repairs}
     return templates.TemplateResponse(
         request=request,
         name="asset_mgmt/templates/assets.html",
-        context={"assets": assets, "theme": theme, "user": current_user}
+        context={"assets": assets, "theme": theme, "user": current_user, "active_repair_map": active_repair_map}
     )
 
 @router.get("/assets/create", response_class=HTMLResponse)
@@ -111,6 +122,10 @@ async def view_asset_page(
     
     depreciation = service.calculate_depreciation(db, asset_id)
     available_components = db.query(model.Asset).filter(model.Asset.asset_type.in_([schema.AssetTypeEnum.COMPONENT, schema.AssetTypeEnum.ACCESSORY]), model.Asset.parent_asset_id == None, model.Asset.status == schema.AssetStatusEnum.AVAILABLE).all()
+    active_repair_map = {
+        req.asset_id: req
+        for req in service.get_active_repair_requests_for_assets(db, [asset.id] + [comp.id for comp in asset.components])
+    }
     
     available_parents = []
     if asset.asset_type in [schema.AssetTypeEnum.COMPONENT, schema.AssetTypeEnum.ACCESSORY]:
@@ -129,6 +144,9 @@ async def view_asset_page(
             "depreciation": depreciation,
             "available_components": available_components,
             "available_parents": available_parents,
+            "active_repair_request": active_repair_map.get(asset.id),
+            "component_repair_map": active_repair_map,
+            "can_manage_repair_queue": _can_manage_repair_queue(current_user),
             "theme": theme,
             "user": current_user
         }
@@ -326,8 +344,129 @@ async def return_asset(
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(deps.get_current_user)]
 ):
+    service.initiate_return(db, asset_id, user_id=current_user.id)
+    return RedirectResponse(url=f"/assets/{asset_id}/view", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/{asset_id}/confirm-return")
+async def confirm_return_asset(
+    asset_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
     service.return_asset(db, asset_id, user_id=current_user.id)
     return RedirectResponse(url=f"/assets/{asset_id}/view", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/{asset_id}/repair-request")
+async def request_repair(
+    asset_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    reason: Annotated[Optional[str], Form()] = None
+):
+    if not current_user.employee:
+        raise HTTPException(status_code=400, detail="User is not linked to an employee profile")
+    existing_request = service.get_active_repair_request_for_asset(db, asset_id)
+    if existing_request:
+        return RedirectResponse(url=f"/assets/{asset_id}/view", status_code=status.HTTP_303_SEE_OTHER)
+
+    repair_request = service.create_repair_request(
+        db,
+        asset_id,
+        requested_by_employee_id=current_user.employee.id,
+        reason=reason,
+        user_id=current_user.id
+    )
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    return RedirectResponse(url=f"/assets/{asset_id}/view", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.get("/assets/repair-requests", response_class=HTMLResponse)
+async def list_repair_requests(
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    skip: int = 0,
+    limit: int = 100
+):
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to view the repair queue")
+    repair_requests = service.get_repair_requests(db, skip=skip, limit=limit)
+    theme = request.cookies.get("theme", "light")
+    return templates.TemplateResponse(
+        request=request,
+        name="asset_mgmt/templates/repair_requests.html",
+        context={"repair_requests": repair_requests, "theme": theme, "user": current_user}
+    )
+
+@router.post("/assets/repair-requests/{request_id}/received")
+async def repair_received_by_repairman(
+    request_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    if not current_user.employee:
+        raise HTTPException(status_code=400, detail="User is not linked to an employee profile")
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to manage repair tickets")
+    repair_request = service.receive_repair_request(db, request_id, current_user.employee.id, user_id=current_user.id)
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Repair request not found")
+    return RedirectResponse(url="/assets/repair-requests", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/repair-requests/{request_id}/start-repair")
+async def repair_start(
+    request_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to manage repair tickets")
+    repair_request = service.start_repair(db, request_id, user_id=current_user.id)
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Repair request not found")
+    return RedirectResponse(url="/assets/repair-requests", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/repair-requests/{request_id}/send-back")
+async def repair_send_back(
+    request_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    repair_notes: Annotated[Optional[str], Form()] = None
+):
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to manage repair tickets")
+    repair_request = service.send_back_repair_request(db, request_id, repair_notes=repair_notes, user_id=current_user.id)
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Repair request not found")
+    return RedirectResponse(url="/assets/repair-requests", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/repair-requests/{request_id}/unrepairable")
+async def repair_mark_unrepairable(
+    request_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)],
+    repair_notes: Annotated[Optional[str], Form()] = None
+):
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to manage repair tickets")
+    repair_request = service.mark_unrepairable(db, request_id, repair_notes=repair_notes, user_id=current_user.id)
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Repair request not found")
+    return RedirectResponse(url="/assets/repair-requests", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/assets/repair-requests/{request_id}/confirm-receipt")
+async def repair_confirm_receipt(
+    request_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    if not _can_manage_repair_queue(current_user):
+        raise HTTPException(status_code=403, detail="You do not have permission to manage repair tickets")
+    repair_request = service.confirm_repair_receipt(db, request_id, user_id=current_user.id)
+    if not repair_request:
+        raise HTTPException(status_code=404, detail="Repair request not found")
+    return RedirectResponse(url="/assets/repair-requests", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/assets/{asset_id}/maintenance")
 async def schedule_maintenance(
@@ -440,6 +579,32 @@ async def list_my_asset_requests(
         request=request,
         name="asset_mgmt/templates/my_asset_requests.html",
         context={"requests": requests, "categories": categories, "employees": employees, "org_units": org_units, "theme": theme, "user": current_user}
+    )
+
+@router.get("/assets/requests/{request_id}/view", response_class=HTMLResponse)
+async def view_asset_request_page(
+    request_id: int,
+    request: Request,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_user)]
+):
+    db_request = service.get_request(db, request_id)
+    if not db_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+
+    repair_request_id = service.get_repair_request_id_from_asset_request_reason(db_request.reason)
+    repair_request = service.get_repair_request(db, repair_request_id) if repair_request_id else None
+    theme = request.cookies.get("theme", "light")
+    return templates.TemplateResponse(
+        request=request,
+        name="asset_mgmt/templates/asset_request_view.html",
+        context={
+            "request_record": db_request,
+            "repair_request": repair_request,
+            "repair_request_id": repair_request_id,
+            "theme": theme,
+            "user": current_user
+        }
     )
 
 @router.post("/assets/requests")

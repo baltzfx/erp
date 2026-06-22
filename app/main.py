@@ -19,7 +19,7 @@ from app.modules.attendance.model import Attendance
 from app.modules.leave.model import LeaveRequest
 from app.modules.holiday.model import Holiday
 from app.modules.shifts.model import Shift
-from app.modules.asset_mgmt.model import Asset, AssetCategory, AssetAssignment, AssetRequest, AssetMaintenance, AssetHistory, BulkJob
+from app.modules.asset_mgmt.model import Asset, AssetCategory, AssetAssignment, AssetRequest, AssetRepairRequest, AssetMaintenance, AssetHistory, BulkJob
 
 # Create database tables
 BaseModel.metadata.create_all(bind=engine)

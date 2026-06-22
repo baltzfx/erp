@@ -51,11 +51,17 @@
                     <td class="px-6 py-4">
                         <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
                             {% if asset.status.value == 'AVAILABLE' %} bg-green-500/10 text-green-500 
-                            {% elif asset.status.value == 'ASSIGNED' %} bg-blue-500/10 text-blue-500
-                            {% elif asset.status.value == 'IN_MAINTENANCE' %} bg-yellow-500/10 text-yellow-500
+                            {% elif asset.status.value in ['ASSIGNED', 'DEPLOYED'] %} bg-blue-500/10 text-blue-500
+                            {% elif asset.status.value in ['PENDING_RETURN', 'IN_TRANSIT'] %} bg-orange-500/10 text-orange-500
+                            {% elif asset.status.value in ['IN_MAINTENANCE', 'UNDER_MAINTENANCE'] %} bg-yellow-500/10 text-yellow-500
                             {% else %} bg-red-500/10 text-red-500 {% endif %}">
                             {{ asset.status.value }}
                         </span>
+                        {% if active_repair_map.get(asset.id) %}
+                        <div class="mt-2 text-[10px] uppercase font-black tracking-widest text-indigo-500">
+                            Repair: {{ active_repair_map.get(asset.id).status.value }}
+                        </div>
+                        {% endif %}
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -65,6 +71,28 @@
                             <a href="/assets/{{ asset.id }}/edit" class="p-2 hover:bg-primary/10 rounded-lg text-primary transition-colors" title="Edit Asset">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             </a>
+                            {% if asset.status.value == 'DEPLOYED' %}
+                            <form method="POST" action="/assets/{{ asset.id }}/return" class="inline">
+                                <button type="submit" class="p-2 hover:bg-yellow-500/10 rounded-lg text-yellow-500 transition-colors" title="Initiate Return" onclick="return confirm('Initiate return for this asset?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"></path><path d="M5 10h11a4 4 0 1 1 0 8h-1"></path></svg>
+                                </button>
+                            </form>
+                            {% elif asset.status.value in ['PENDING_RETURN', 'IN_TRANSIT'] %}
+                            <form method="POST" action="/assets/{{ asset.id }}/confirm-return" class="inline">
+                                <button type="submit" class="p-2 hover:bg-green-500/10 rounded-lg text-green-500 transition-colors" title="Confirm Return" onclick="return confirm('Confirm return for this asset?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if asset.status.value not in ['DISPOSED', 'LOST', 'STOLEN', 'UNDER_MAINTENANCE'] and not active_repair_map.get(asset.id) %}
+                            <form method="POST" action="/assets/{{ asset.id }}/repair-request" class="inline">
+                                <button type="submit" class="p-2 hover:bg-indigo-500/10 rounded-lg text-indigo-500 transition-colors" title="Request Repair" onclick="return confirm('Request repair for this asset?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.5-3.5-3-3-3.5 3.5z"></path><path d="M11 13a5 5 0 0 1-7 0l-1 1 3 3 1-1a5 5 0 0 1 4-4z"></path><path d="M20 14l-6 6"></path></svg>
+                                </button>
+                            </form>
+                            {% elif active_repair_map.get(asset.id) %}
+                            <span class="p-2 rounded-lg text-indigo-500 bg-indigo-500/10 text-[10px] font-black uppercase tracking-widest">In Repair</span>
+                            {% endif %}
                             <button hx-delete="/assets/{{ asset.id }}" hx-confirm="Are you sure you want to delete this asset?" hx-target="closest tr" hx-swap="outerHTML" class="p-2 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors" title="Delete Asset">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             </button>
@@ -89,6 +117,11 @@
                         <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary">
                             {{ comp.status.value }}
                         </span>
+                        {% if active_repair_map.get(comp.id) %}
+                        <div class="mt-2 text-[10px] uppercase font-black tracking-widest text-indigo-500">
+                            Repair: {{ active_repair_map.get(comp.id).status.value }}
+                        </div>
+                        {% endif %}
                     </td>
                     <td class="px-6 py-3 text-right">
                         <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -98,6 +131,28 @@
                             <a href="/assets/{{ comp.id }}/edit" class="p-1.5 hover:bg-primary/10 rounded-lg text-primary transition-colors" title="Edit Component">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             </a>
+                            {% if comp.status.value == 'DEPLOYED' %}
+                            <form method="POST" action="/assets/{{ comp.id }}/return" class="inline">
+                                <button type="submit" class="p-1.5 hover:bg-yellow-500/10 rounded-lg text-yellow-500 transition-colors" title="Initiate Return" onclick="return confirm('Initiate return for this component?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"></path><path d="M5 10h11a4 4 0 1 1 0 8h-1"></path></svg>
+                                </button>
+                            </form>
+                            {% elif comp.status.value in ['PENDING_RETURN', 'IN_TRANSIT'] %}
+                            <form method="POST" action="/assets/{{ comp.id }}/confirm-return" class="inline">
+                                <button type="submit" class="p-1.5 hover:bg-green-500/10 rounded-lg text-green-500 transition-colors" title="Confirm Return" onclick="return confirm('Confirm return for this component?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if comp.status.value not in ['DISPOSED', 'LOST', 'STOLEN', 'UNDER_MAINTENANCE'] and not active_repair_map.get(comp.id) %}
+                            <form method="POST" action="/assets/{{ comp.id }}/repair-request" class="inline">
+                                <button type="submit" class="p-1.5 hover:bg-indigo-500/10 rounded-lg text-indigo-500 transition-colors" title="Request Repair" onclick="return confirm('Request repair for this component?');">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.5-3.5-3-3-3.5 3.5z"></path><path d="M11 13a5 5 0 0 1-7 0l-1 1 3 3 1-1a5 5 0 0 1 4-4z"></path><path d="M20 14l-6 6"></path></svg>
+                                </button>
+                            </form>
+                            {% elif active_repair_map.get(comp.id) %}
+                            <span class="p-1.5 rounded-lg text-indigo-500 bg-indigo-500/10 text-[10px] font-black uppercase tracking-widest">In Repair</span>
+                            {% endif %}
                             <button hx-delete="/assets/{{ comp.id }}" hx-confirm="Are you sure you want to delete this component?" hx-target="closest tr" hx-swap="outerHTML" class="p-1.5 hover:bg-red-500/10 rounded-lg text-red-500 transition-colors" title="Delete Component">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             </button>

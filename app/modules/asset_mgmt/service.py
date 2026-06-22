@@ -1,4 +1,5 @@
 from typing import List, Optional
+import re
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 
@@ -140,6 +141,26 @@ def assign_asset(db: Session, asset_id: int, employee_id: Optional[int] = None, 
         log_asset_history(db, asset_id, "Assigned", f"Assigned to org unit {org_unit_id}", user_id)
     return assignment
 
+def initiate_return(db: Session, asset_id: int, user_id: Optional[int] = None):
+    db_asset = get_asset(db, asset_id)
+    if not db_asset:
+        return None
+        
+    db_asset.status = schema.AssetStatusEnum.PENDING_RETURN
+    
+    def _cascade_status(asset, new_status):
+        for child in asset.components:
+            child.status = new_status
+            db.add(child)
+            _cascade_status(child, new_status)
+            
+    _cascade_status(db_asset, schema.AssetStatusEnum.PENDING_RETURN)
+    db.add(db_asset)
+    db.commit()
+    
+    log_asset_history(db, asset_id, "Return Initiated", "Asset return process has been initiated", user_id)
+    return db_asset
+
 def return_asset(db: Session, asset_id: int, user_id: Optional[int] = None):
     db_asset = get_asset(db, asset_id)
     if not db_asset:
@@ -155,6 +176,10 @@ def return_asset(db: Session, asset_id: int, user_id: Optional[int] = None):
         assignment.return_date = date.today()
         db.add(assignment)
         
+    # Detach from parent bundle if returned individually
+    if db_asset.parent_asset_id:
+        db_asset.parent_asset_id = None
+        
     db_asset.status = schema.AssetStatusEnum.AVAILABLE
     
     def _cascade_status(asset, new_status):
@@ -167,8 +192,231 @@ def return_asset(db: Session, asset_id: int, user_id: Optional[int] = None):
     db.add(db_asset)
     db.commit()
     
-    log_asset_history(db, asset_id, "Returned", "Asset returned to inventory", user_id)
+    log_asset_history(db, asset_id, "Receipt Confirmed", "Asset receipt confirmed and returned to inventory", user_id)
     return db_asset
+
+def _asset_status_after_repair(db: Session, db_asset):
+    if db_asset.parent_asset_id and db_asset.parent_asset:
+        return db_asset.parent_asset.status
+
+    assignment = db.query(model.AssetAssignment).filter(
+        model.AssetAssignment.asset_id == db_asset.id,
+        model.AssetAssignment.status == schema.AssignmentStatusEnum.ACTIVE
+    ).first()
+    if assignment:
+        return schema.AssetStatusEnum.DEPLOYED
+
+    return schema.AssetStatusEnum.AVAILABLE
+
+def get_active_repair_request_for_asset(db: Session, asset_id: int):
+    return (
+        db.query(model.AssetRepairRequest)
+        .filter(
+            model.AssetRepairRequest.asset_id == asset_id,
+            model.AssetRepairRequest.status.in_([
+                schema.RepairRequestStatusEnum.REQUESTED,
+                schema.RepairRequestStatusEnum.RECEIVED_BY_REPAIRMAN,
+                schema.RepairRequestStatusEnum.REPAIRING,
+                schema.RepairRequestStatusEnum.IN_TRANSIT,
+                schema.RepairRequestStatusEnum.UNREPAIRABLE,
+                schema.RepairRequestStatusEnum.SENT_BACK_TO_USER,
+            ])
+        )
+        .order_by(model.AssetRepairRequest.id.desc())
+        .first()
+    )
+
+def create_repair_request(
+    db: Session,
+    asset_id: int,
+    requested_by_employee_id: int,
+    reason: Optional[str] = None,
+    user_id: Optional[int] = None
+):
+    db_asset = get_asset(db, asset_id)
+    if not db_asset:
+        return None
+    if db_asset.status in [schema.AssetStatusEnum.DISPOSED, schema.AssetStatusEnum.LOST, schema.AssetStatusEnum.STOLEN]:
+        return None
+
+    existing_request = get_active_repair_request_for_asset(db, asset_id)
+    if existing_request:
+        return existing_request
+
+    repair_request = model.AssetRepairRequest(
+        asset_id=asset_id,
+        requested_by_employee_id=requested_by_employee_id,
+        request_date=date.today(),
+        status=schema.RepairRequestStatusEnum.REQUESTED,
+        reason=reason
+    )
+    db.add(repair_request)
+    db.commit()
+    db.refresh(repair_request)
+
+    log_asset_history(
+        db,
+        asset_id,
+        "Repair Requested",
+        reason or "Repair request submitted",
+        user_id
+    )
+    return repair_request
+
+def get_repair_requests(db: Session, skip: int = 0, limit: int = 100):
+    return (
+        db.query(model.AssetRepairRequest)
+        .order_by(model.AssetRepairRequest.request_date.desc(), model.AssetRepairRequest.id.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+def get_active_repair_requests_for_assets(db: Session, asset_ids: List[int]):
+    if not asset_ids:
+        return []
+    return (
+        db.query(model.AssetRepairRequest)
+        .filter(
+            model.AssetRepairRequest.asset_id.in_(asset_ids),
+            model.AssetRepairRequest.status.in_([
+                schema.RepairRequestStatusEnum.REQUESTED,
+                schema.RepairRequestStatusEnum.RECEIVED_BY_REPAIRMAN,
+                schema.RepairRequestStatusEnum.REPAIRING,
+                schema.RepairRequestStatusEnum.IN_TRANSIT,
+                schema.RepairRequestStatusEnum.UNREPAIRABLE,
+                schema.RepairRequestStatusEnum.SENT_BACK_TO_USER,
+            ])
+        )
+        .all()
+    )
+
+def get_repair_request(db: Session, request_id: int):
+    return db.query(model.AssetRepairRequest).filter(model.AssetRepairRequest.id == request_id).first()
+
+def receive_repair_request(db: Session, request_id: int, repairman_employee_id: int, user_id: Optional[int] = None):
+    repair_request = get_repair_request(db, request_id)
+    if not repair_request:
+        return None
+    if repair_request.status != schema.RepairRequestStatusEnum.REQUESTED:
+        return None
+
+    repair_request.status = schema.RepairRequestStatusEnum.RECEIVED_BY_REPAIRMAN
+    repair_request.repairman_employee_id = repairman_employee_id
+    repair_request.received_by_repairman_at = datetime.now()
+
+    db_asset = get_asset(db, repair_request.asset_id)
+    if db_asset:
+        db_asset.status = schema.AssetStatusEnum.UNDER_MAINTENANCE
+        for child in db_asset.components:
+            child.status = schema.AssetStatusEnum.UNDER_MAINTENANCE
+            db.add(child)
+        db.add(db_asset)
+
+    db.add(repair_request)
+    db.commit()
+
+    log_asset_history(db, repair_request.asset_id, "Repair Received", "Repairman received the asset for repair", user_id)
+    return repair_request
+
+def start_repair(db: Session, request_id: int, user_id: Optional[int] = None):
+    repair_request = get_repair_request(db, request_id)
+    if not repair_request:
+        return None
+    if repair_request.status != schema.RepairRequestStatusEnum.RECEIVED_BY_REPAIRMAN:
+        return None
+
+    repair_request.status = schema.RepairRequestStatusEnum.REPAIRING
+    repair_request.repair_started_at = datetime.now()
+    db.add(repair_request)
+    db.commit()
+
+    log_asset_history(db, repair_request.asset_id, "Repair Started", "Repair work started", user_id)
+    return repair_request
+
+def send_back_repair_request(db: Session, request_id: int, repair_notes: Optional[str] = None, user_id: Optional[int] = None):
+    repair_request = get_repair_request(db, request_id)
+    if not repair_request:
+        return None
+    if repair_request.status != schema.RepairRequestStatusEnum.REPAIRING:
+        return None
+
+    repair_request.status = schema.RepairRequestStatusEnum.IN_TRANSIT
+    repair_request.sent_back_at = datetime.now()
+    if repair_notes:
+        repair_request.repair_notes = repair_notes
+
+    db_asset = get_asset(db, repair_request.asset_id)
+    if db_asset:
+        db_asset.status = schema.AssetStatusEnum.IN_TRANSIT
+        for child in db_asset.components:
+            child.status = schema.AssetStatusEnum.IN_TRANSIT
+            db.add(child)
+        db.add(db_asset)
+
+    db.add(repair_request)
+    db.commit()
+
+    log_asset_history(db, repair_request.asset_id, "Repair In Transit", repair_notes or "Repaired asset sent back to user", user_id)
+    return repair_request
+
+def confirm_repair_receipt(db: Session, request_id: int, user_id: Optional[int] = None):
+    repair_request = get_repair_request(db, request_id)
+    if not repair_request:
+        return None
+    if repair_request.status not in [
+        schema.RepairRequestStatusEnum.IN_TRANSIT,
+        schema.RepairRequestStatusEnum.SENT_BACK_TO_USER,
+    ]:
+        return None
+
+    repair_request.status = schema.RepairRequestStatusEnum.RECEIVED_BY_USER
+    repair_request.received_by_user_at = datetime.now()
+
+    db_asset = get_asset(db, repair_request.asset_id)
+    if db_asset:
+        final_status = _asset_status_after_repair(db, db_asset)
+        db_asset.status = final_status
+        for child in db_asset.components:
+            child.status = final_status
+            db.add(child)
+        db.add(db_asset)
+
+    db.add(repair_request)
+    db.commit()
+
+    log_asset_history(db, repair_request.asset_id, "Repair Completed", "User received the repaired asset", user_id)
+    return repair_request
+
+def mark_unrepairable(db: Session, request_id: int, repair_notes: Optional[str] = None, user_id: Optional[int] = None):
+    repair_request = get_repair_request(db, request_id)
+    if not repair_request:
+        return None
+    if repair_request.status not in [
+        schema.RepairRequestStatusEnum.RECEIVED_BY_REPAIRMAN,
+        schema.RepairRequestStatusEnum.REPAIRING,
+    ]:
+        return None
+
+    repair_request.status = schema.RepairRequestStatusEnum.UNREPAIRABLE
+    if repair_notes:
+        repair_request.repair_notes = repair_notes
+
+    db_asset = get_asset(db, repair_request.asset_id)
+    if db_asset:
+        # Close out the user's accountability first, then retire the asset.
+        return_asset(db, db_asset.id, user_id)
+        db_asset.status = schema.AssetStatusEnum.DISPOSED
+        for child in db_asset.components:
+            child.status = schema.AssetStatusEnum.DISPOSED
+            db.add(child)
+        db.add(db_asset)
+
+    db.add(repair_request)
+    db.commit()
+
+    log_asset_history(db, repair_request.asset_id, "Repair Unrepairable", repair_notes or "Repairman marked asset as unrepairable", user_id)
+    return repair_request
 
 def transfer_asset(db: Session, asset_id: int, new_employee_id: Optional[int] = None, new_org_unit_id: Optional[int] = None, user_id: Optional[int] = None):
     return_asset(db, asset_id, user_id)
@@ -180,6 +428,15 @@ def get_requests(db: Session, skip: int = 0, limit: int = 100):
 
 def get_employee_requests(db: Session, employee_id: int):
     return db.query(model.AssetRequest).filter(model.AssetRequest.employee_id == employee_id).all()
+
+def get_request(db: Session, request_id: int):
+    return db.query(model.AssetRequest).filter(model.AssetRequest.id == request_id).first()
+
+def get_repair_request_id_from_asset_request_reason(reason: Optional[str]) -> Optional[int]:
+    if not reason:
+        return None
+    match = re.search(r"\[repair_request_id=(\d+)\]", reason)
+    return int(match.group(1)) if match else None
 
 def create_request(db: Session, employee_id: int, request_in: schema.AssetRequestCreate):
     db_req = model.AssetRequest(

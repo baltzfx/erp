@@ -186,6 +186,11 @@
             <li><a
                 class="flex items-center gap-x-3.5 py-1.5 px-2.5 text-sm text-text-muted hover:text-primary rounded-md"
                 href="/assets/my-requests">My Requests</a></li>
+            {% if user.is_superuser or (user.role and ('repair' in user.role.name|lower or 'maintenance' in user.role.name|lower or 'admin' in user.role.name|lower)) %}
+            <li><a
+                class="flex items-center gap-x-3.5 py-1.5 px-2.5 text-sm text-text-muted hover:text-primary rounded-md"
+                href="/assets/repair-requests">Repair Queue</a></li>
+            {% endif %}
           </ul>
         </div>
       </li>

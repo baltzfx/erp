@@ -1,0 +1,110 @@
+{% extends "layout_dashboard.html" %}
+
+{% block title %}Repair Requests{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl text-text-main tracking-tight">Asset <span class="text-primary italic">Repair Queue</span></h1>
+            <p class="text-text-main opacity-50 text-sm mt-1">Track repair intake, work in progress, and return to the user</p>
+        </div>
+    </div>
+
+    <div class="bg-bg-main border border-primary/10 shadow-xl rounded-2xl overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-primary/5 border-b border-primary/10">
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Asset</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Requested By</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Status</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40">Timeline</th>
+                    <th class="px-6 py-4 text-xs font-black uppercase tracking-widest text-text-main opacity-40 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-primary/5">
+                {% for req in repair_requests %}
+                <tr class="hover:bg-primary/5 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-text-main text-sm">
+                            <a href="/assets/{{ req.asset.id }}/view" class="hover:text-primary transition-colors">{{ req.asset.name }}</a>
+                        </div>
+                        <div class="text-xs text-text-main opacity-50">{{ req.asset.serial_number or 'No S/N' }}</div>
+                        {% if req.reason %}
+                        <div class="text-xs text-text-main opacity-70 mt-1">{{ req.reason }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-text-main opacity-80">
+                        {{ req.requested_by_employee.first_name }} {{ req.requested_by_employee.last_name }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+                            {% if req.status.value == 'RECEIVED_BY_USER' %} bg-green-500/10 text-green-500
+                            {% elif req.status.value == 'REPAIRING' %} bg-yellow-500/10 text-yellow-500
+                            {% elif req.status.value in ['IN_TRANSIT', 'SENT_BACK_TO_USER'] %} bg-blue-500/10 text-blue-500
+                            {% elif req.status.value == 'RECEIVED_BY_REPAIRMAN' %} bg-indigo-500/10 text-indigo-500
+                            {% elif req.status.value == 'UNREPAIRABLE' %} bg-red-500/10 text-red-500
+                            {% else %} bg-primary/10 text-primary {% endif %}">
+                            {{ req.status.value }}
+                        </span>
+                        <div class="text-xs text-text-main opacity-50 mt-2">
+                            {% if req.repairman_employee %}
+                                Repairman: {{ req.repairman_employee.first_name }} {{ req.repairman_employee.last_name }}
+                            {% else %}
+                                Waiting to be received
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-text-main opacity-70 space-y-1">
+                        <div>Requested: {{ req.request_date }}</div>
+                        <div>Received: {{ req.received_by_repairman_at.strftime('%Y-%m-%d %H:%M') if req.received_by_repairman_at else 'N/A' }}</div>
+                        <div>Repairing: {{ req.repair_started_at.strftime('%Y-%m-%d %H:%M') if req.repair_started_at else 'N/A' }}</div>
+                        <div>Sent Back: {{ req.sent_back_at.strftime('%Y-%m-%d %H:%M') if req.sent_back_at else 'N/A' }}</div>
+                        <div>User Received: {{ req.received_by_user_at.strftime('%Y-%m-%d %H:%M') if req.received_by_user_at else 'N/A' }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="/assets/{{ req.asset.id }}/view" class="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all">View Asset</a>
+
+                            {% if req.status.value == 'REQUESTED' %}
+                            <form method="POST" action="/assets/repair-requests/{{ req.id }}/received">
+                                <button type="submit" class="px-3 py-1.5 bg-indigo-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all">Receive</button>
+                            </form>
+                            {% elif req.status.value == 'RECEIVED_BY_REPAIRMAN' %}
+                            <form method="POST" action="/assets/repair-requests/{{ req.id }}/start-repair">
+                                <button type="submit" class="px-3 py-1.5 bg-yellow-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all">Start Repair</button>
+                            </form>
+                            {% elif req.status.value == 'REPAIRING' %}
+                            <form method="POST" class="space-y-2">
+                                <textarea name="repair_notes" rows="3" placeholder="Notes for return or unrepairable verdict..." class="w-56 bg-bg-main border border-primary/20 rounded-lg px-3 py-2 text-xs text-text-main focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                                <div class="space-y-2">
+                                    <button type="submit" formaction="/assets/repair-requests/{{ req.id }}/send-back" class="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all block w-full">Send Back</button>
+                                    <button type="submit" formaction="/assets/repair-requests/{{ req.id }}/unrepairable" class="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all block w-full">Mark Unrepairable</button>
+                                </div>
+                            </form>
+                            {% elif req.status.value in ['IN_TRANSIT', 'SENT_BACK_TO_USER'] %}
+                            <form method="POST" action="/assets/repair-requests/{{ req.id }}/confirm-receipt">
+                                <button type="submit" class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all">User Received</button>
+                            </form>
+                            {% elif req.status.value == 'UNREPAIRABLE' %}
+                            <div class="space-y-2">
+                                <div class="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-bold">Marked Unrepairable</div>
+                                <a href="/assets/my-requests" class="inline-flex px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all">Have User Request Replacement</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not repair_requests %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-text-main opacity-40 italic">
+                        No repair requests found.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

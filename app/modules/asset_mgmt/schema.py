@@ -6,7 +6,9 @@ from datetime import date, datetime
 class AssetStatusEnum(str, Enum):
     AVAILABLE = "AVAILABLE"
     DEPLOYED = "DEPLOYED"
+    PENDING_RETURN = "PENDING_RETURN"
     UNDER_MAINTENANCE = "UNDER_MAINTENANCE"
+    IN_TRANSIT = "IN_TRANSIT"
     DISPOSED = "DISPOSED"
     OUT_OF_STOCK = "OUT_OF_STOCK"
     LOST = "LOST"
@@ -28,6 +30,16 @@ class RequestStatusEnum(str, Enum):
 class MaintenanceStatusEnum(str, Enum):
     SCHEDULED = "SCHEDULED"
     COMPLETED = "COMPLETED"
+
+class RepairRequestStatusEnum(str, Enum):
+    REQUESTED = "REQUESTED"
+    RECEIVED_BY_REPAIRMAN = "RECEIVED_BY_REPAIRMAN"
+    REPAIRING = "REPAIRING"
+    IN_TRANSIT = "IN_TRANSIT"
+    RECEIVED_BY_USER = "RECEIVED_BY_USER"
+    UNREPAIRABLE = "UNREPAIRABLE"
+    CANCELLED = "CANCELLED"
+    SENT_BACK_TO_USER = "SENT_BACK_TO_USER"
 
 class AssetTypeEnum(str, Enum):
     STANDARD = "STANDARD"
@@ -155,6 +167,26 @@ class AssetHistoryOut(BaseModel):
     user_id: Optional[int] = None
     details: Optional[str] = None
 
+    model_config = ConfigDict(from_attributes=True)
+
+class RepairRequestBase(BaseModel):
+    asset_id: int
+    requested_by_employee_id: int
+    repairman_employee_id: Optional[int] = None
+    request_date: date
+    received_by_repairman_at: Optional[datetime] = None
+    repair_started_at: Optional[datetime] = None
+    sent_back_at: Optional[datetime] = None
+    received_by_user_at: Optional[datetime] = None
+    status: RepairRequestStatusEnum = RepairRequestStatusEnum.REQUESTED
+    reason: Optional[str] = None
+    repair_notes: Optional[str] = None
+
+class RepairRequestCreate(BaseModel):
+    reason: Optional[str] = None
+
+class RepairRequestOut(RepairRequestBase):
+    id: int
     model_config = ConfigDict(from_attributes=True)
 
 class BulkDeleteRequest(BaseModel):
